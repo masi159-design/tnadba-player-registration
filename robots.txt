@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://tnadba-player-registration.tnadba.workers.dev/sitemap.xml
