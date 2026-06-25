@@ -1,0 +1,2051 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TNADBA Player Registration Portal | Tamil Nadu Amateur Dodgeball Association</title>
+<meta name="description" content="Official Player Registration Portal of the Tamil Nadu Amateur Dodgeball Association (TNADBA). Register for district, state, national championships, training camps and player verification.">
+<meta name="keywords" content="TNADBA, Tamil Nadu Amateur Dodgeball Association, Dodgeball Tamil Nadu, Player Registration, Dodgeball Registration, Tamil Nadu Sports, Senior National Dodgeball, Junior Dodgeball">
+<meta name="author" content="Tamil Nadu Amateur Dodgeball Association">
+<meta name="robots" content="index, follow">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;600;700&family=Source+Sans+3:wght@400;500;600;700&family=Space+Mono:wght@500;700&display=swap" rel="stylesheet">
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Space+Mono:wght@700&display=swap');
+:root{
+  --gold:#C8972A;
+  --gold-light:#F5C842;
+  --gold-bg:rgba(200,151,42,.09);
+  --navy:#0D1B2E;
+  --navy-mid:#152540;
+  --navy-soft:#5B7499;
+  --green:#0E7A45;
+  --green-bg:#E6F5EE;
+  --red:#C0321E;
+  --red-bg:#FDECEA;
+  --blue:#1E6FBF;
+  --blue-bg:#E8F0FB;
+  --bg:#F4F6FA;
+  --surface:#FFFFFF;
+  --border:#E2E8F0;
+  --border-strong:#C8D4E4;
+  --text:#1A2332;
+  --text-soft:#5B6B80;
+  --text-muted:#8A9AB0;
+  --shadow-sm:0 1px 3px rgba(13,27,46,.06),0 1px 2px rgba(13,27,46,.04);
+  --shadow:0 4px 12px rgba(13,27,46,.08),0 1px 3px rgba(13,27,46,.06);
+  --shadow-md:0 8px 24px rgba(13,27,46,.12),0 2px 6px rgba(13,27,46,.06);
+  --shadow-lg:0 20px 60px rgba(13,27,46,.18);
+  --r:8px;--r-md:12px;--r-lg:16px;--r-xl:24px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Inter','Source Sans 3',system-ui,sans-serif;background:var(--bg);color:var(--text);min-height:100vh;-webkit-font-smoothing:antialiased;font-size:14px}
+h1,h2,h3{font-family:'Oswald',system-ui,sans-serif;text-transform:uppercase;letter-spacing:.3px}
+.mono{font-family:'Space Mono',monospace}
+
+/* ── INPUTS ── */
+input,select,textarea{width:100%;padding:10px 13px;border:1.5px solid var(--border);border-radius:var(--r);background:var(--surface);color:var(--text);font-size:14px;font-family:'Inter','Source Sans 3',sans-serif;margin-top:5px;transition:border-color .15s,box-shadow .15s;line-height:1.4}
+input:focus,select:focus,textarea:focus{outline:none;border-color:var(--gold);box-shadow:0 0 0 3px rgba(200,151,42,.14)}
+input::placeholder,textarea::placeholder{color:var(--text-muted)}
+label{font-size:11.5px;color:var(--text-soft);display:block;margin-top:14px;font-weight:600;letter-spacing:.25px;text-transform:uppercase}
+label .req{color:var(--red)}
+
+/* ── BUTTONS ── */
+.btn{padding:9px 18px;border-radius:var(--r);border:1.5px solid var(--border);background:var(--surface);color:var(--text);cursor:pointer;font-size:12.5px;font-weight:600;font-family:'Inter','Source Sans 3',sans-serif;text-transform:uppercase;letter-spacing:.4px;transition:all .14s;display:inline-flex;align-items:center;gap:5px;white-space:nowrap}
+.btn:hover{box-shadow:var(--shadow);transform:translateY(-1px)}
+.btn:active{transform:none;box-shadow:none}
+.btn:disabled{opacity:.45;cursor:not-allowed;transform:none;box-shadow:none}
+.btn-primary{background:var(--navy);color:#fff;border-color:var(--navy)}
+.btn-primary:hover{background:var(--navy-mid)}
+.btn-danger{background:var(--red);color:#fff;border-color:var(--red)}
+.btn-danger:hover{filter:brightness(1.1)}
+.btn-success{background:var(--green);color:#fff;border-color:var(--green)}
+.btn-success:hover{filter:brightness(1.1)}
+.btn-gold{background:linear-gradient(135deg,var(--gold),#A87A1E);color:#fff;border-color:transparent;box-shadow:0 2px 8px rgba(200,151,42,.28)}
+.btn-gold:hover{box-shadow:0 4px 16px rgba(200,151,42,.4)}
+.btn-ghost{background:rgba(255,255,255,.08);color:rgba(255,255,255,.85);border-color:rgba(255,255,255,.15)}
+.btn-ghost:hover{background:rgba(255,255,255,.14);border-color:rgba(255,255,255,.25)}
+.btn-sm{padding:5px 12px;font-size:11px}
+.btn-xs{padding:3px 9px;font-size:10.5px}
+
+/* ── CARDS ── */
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r-lg);padding:1.5rem;box-shadow:var(--shadow-sm)}
+
+/* ── BADGES ── */
+.badge{display:inline-flex;align-items:center;padding:3px 9px;border-radius:20px;font-size:10px;font-weight:700;letter-spacing:.4px;text-transform:uppercase;gap:4px}
+.badge-blue{background:var(--blue-bg);color:var(--blue)}
+.badge-green{background:var(--green-bg);color:var(--green)}
+.badge-amber{background:#FEF3DC;color:#8A6200}
+.badge-red{background:var(--red-bg);color:var(--red)}
+
+/* ── ALERTS ── */
+.err{color:#8B1A0E;font-size:13px;margin-top:8px;padding:10px 13px;background:var(--red-bg);border-radius:var(--r);border-left:3px solid var(--red);font-weight:500}
+.suc{color:#0A5C30;font-size:13px;margin-top:8px;padding:10px 13px;background:var(--green-bg);border-radius:var(--r);border-left:3px solid var(--green);font-weight:500}
+
+/* ── TOPBAR ── */
+.topbar{display:flex;align-items:center;justify-content:space-between;padding:0 1.6rem;height:60px;background:var(--navy);border-bottom:2.5px solid var(--gold);position:sticky;top:0;z-index:50;box-shadow:0 2px 16px rgba(13,27,46,.28)}
+.topbar-left{display:flex;align-items:center;gap:12px}
+.topbar-logo{width:38px;height:38px;border-radius:50%;object-fit:cover;border:2px solid var(--gold);box-shadow:0 0 0 3px rgba(200,151,42,.18)}
+.topbar-title{font-family:'Oswald',sans-serif;font-weight:700;font-size:14.5px;color:#fff;letter-spacing:.6px;line-height:1.15}
+.topbar-sub{font-size:10px;color:rgba(255,255,255,.38);letter-spacing:.2px;margin-top:1px}
+.topbar-divider{width:1px;height:22px;background:rgba(255,255,255,.1);margin:0 4px}
+.topbar-right{display:flex;align-items:center;gap:8px}
+.topbar-chip{display:flex;align-items:center;gap:7px;padding:5px 12px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:20px}
+.topbar-chip-name{font-size:12px;font-weight:700;color:var(--gold-light);letter-spacing:.3px}
+
+/* ── TABLE ── */
+table{width:100%;border-collapse:collapse;font-size:12.5px}
+thead tr{background:linear-gradient(90deg,#0D1B2E 0%,#152848 60%,#1E3460 100%)}
+th{text-align:left;padding:11px 13px;font-size:9px;color:rgba(255,255,255,.5);font-weight:700;white-space:nowrap;text-transform:uppercase;letter-spacing:.9px;border-bottom:2px solid var(--gold)}
+td{padding:9px 13px;border-bottom:1px solid var(--border);color:var(--text);vertical-align:middle}
+tbody tr{transition:background .1s}
+tbody tr:hover td{background:#EEF3FA}
+tbody tr.row-selected td{background:#EBF3FF}
+
+/* ── TABS (responsive, wraps on mobile) ── */
+.tabs{display:flex;flex-wrap:wrap;gap:0;margin-bottom:1.2rem;border-bottom:2px solid var(--border)}
+.tab{padding:10px 16px;font-size:11.5px;cursor:pointer;background:transparent;color:var(--text-soft);font-weight:700;text-transform:uppercase;letter-spacing:.4px;border-bottom:2.5px solid transparent;margin-bottom:-2px;transition:all .14s;white-space:nowrap}
+.tab:hover{color:var(--text);background:rgba(13,27,46,.03)}
+.tab.active{color:var(--navy);border-bottom-color:var(--gold);background:var(--gold-bg)}
+@media(max-width:640px){
+  .tabs{border-bottom:none;gap:4px;margin-bottom:1rem;flex-wrap:wrap}
+  .tab{border:1.5px solid var(--border);border-radius:var(--r);padding:7px 11px;font-size:10px;margin-bottom:0}
+  .tab.active{border-color:var(--gold);background:var(--gold-bg);color:var(--navy)}
+  .screen{padding:1rem}
+  .grid4{grid-template-columns:repeat(2,1fr);gap:10px}
+  .grid2{grid-template-columns:repeat(2,1fr);gap:10px}
+  .topbar{padding:0 1rem;height:56px}
+}
+
+/* ── STAT CARDS ── */
+.grid4{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
+.grid2{display:grid;grid-template-columns:repeat(2,1fr);gap:14px}
+.stat{background:var(--surface);border-radius:var(--r-md);padding:18px 14px;text-align:center;border:1px solid var(--border);border-top:3px solid var(--gold);box-shadow:var(--shadow-sm);transition:transform .15s,box-shadow .15s}
+.stat:hover{transform:translateY(-2px);box-shadow:var(--shadow)}
+.stat-icon{width:32px;height:32px;margin:0 auto 12px;display:block;opacity:.85}
+.stat-num{font-family:'Oswald',sans-serif;font-size:30px;font-weight:700;background:linear-gradient(135deg,var(--navy) 0%,#2A5298 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;font-variant-numeric:tabular-nums;line-height:1.1}
+.stat-lbl{font-size:10px;color:var(--text-muted);margin-top:5px;font-weight:600;text-transform:uppercase;letter-spacing:.6px}
+
+/* ── MISC ── */
+.overflow-x{overflow-x:auto;border-radius:var(--r-md);border:1px solid var(--border);box-shadow:var(--shadow-sm)}
+.hidden{display:none!important}
+.screen{padding:1.6rem 1.8rem}
+.section-label{font-size:10.5px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:.8px;margin-bottom:10px;display:flex;align-items:center;gap:8px}
+.section-label::after{content:'';flex:1;height:1px;background:var(--border)}
+
+/* ── TOGGLE ── */
+.toggle{position:relative;width:44px;height:24px;cursor:pointer;display:inline-block;flex-shrink:0}
+.toggle input{opacity:0;width:0;height:0}
+.slider{position:absolute;inset:0;border-radius:24px;background:#C8D4E0;transition:.22s}
+.slider:before{content:'';position:absolute;width:18px;height:18px;left:3px;bottom:3px;border-radius:50%;background:#fff;transition:.22s;box-shadow:0 1px 4px rgba(0,0,0,.2)}
+.toggle input:checked+.slider{background:var(--green)}
+.toggle input:checked+.slider:before{transform:translateX(20px)}
+.toggle-row{display:flex;align-items:center;justify-content:space-between;padding:14px 18px;border-radius:var(--r-md);border:1px solid var(--border);background:var(--surface);margin-bottom:.9rem;gap:12px;box-shadow:var(--shadow-sm)}
+.closed-banner{background:#FDF0EE;border:1px solid #F0C0B8;border-left:4px solid var(--red);border-radius:var(--r-lg);padding:2rem 1.5rem;text-align:center;margin-bottom:1rem}
+
+/* ── PLAYER ID BADGE ── */
+.pid{font-family:'Space Mono',monospace;font-size:9.5px;background:linear-gradient(135deg,#0D1B2E 0%,#1A3060 100%);color:var(--gold-light);padding:4px 9px;border-radius:6px;font-weight:700;letter-spacing:.8px;border:1px solid rgba(200,151,42,.3);display:inline-flex;align-items:center;line-height:1;box-shadow:0 1px 4px rgba(13,27,46,.3),inset 0 1px 0 rgba(255,255,255,.07)}
+
+/* ── MODAL ── */
+.modal-bg{position:fixed;inset:0;background:rgba(13,27,46,.65);z-index:100;display:flex;align-items:center;justify-content:center;padding:1rem;backdrop-filter:blur(5px)}
+.modal{background:var(--surface);border-radius:var(--r-xl);padding:1.8rem;width:100%;max-width:480px;max-height:90vh;overflow-y:auto;box-shadow:var(--shadow-lg)}
+.modal-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:1.2rem;padding-bottom:1rem;border-bottom:1px solid var(--border)}
+.modal-title{font-family:'Oswald',sans-serif;font-size:16px;font-weight:700;color:var(--navy);text-transform:uppercase;letter-spacing:.3px}
+
+/* ── STAGE TRACK ── */
+.stage-track{display:flex;gap:4px;margin-bottom:20px}
+.stage-block{flex:1;height:3px;background:var(--border);border-radius:2px;transition:background .2s}
+.stage-block.done{background:linear-gradient(90deg,var(--gold),var(--gold-light))}
+.section-eyebrow{font-size:10.5px;font-weight:700;color:var(--gold);text-transform:uppercase;letter-spacing:.7px;display:flex;align-items:center;gap:8px;margin-bottom:6px;margin-top:22px}
+.section-eyebrow::before{content:'';width:14px;height:2.5px;background:var(--gold);display:inline-block;border-radius:2px}
+.section-eyebrow:first-of-type{margin-top:0}
+
+/* ── SEARCH PANEL ── */
+.search-panel{background:var(--surface);border:1px solid var(--border);border-radius:var(--r-md);padding:12px 14px;box-shadow:var(--shadow-sm);margin-bottom:10px}
+.search-panel input[type=text]{background:var(--bg);border-color:var(--border);margin-top:0;font-size:13.5px}
+.search-panel input[type=date]{background:var(--bg);border-color:var(--border);width:auto;min-width:140px;margin-top:0}
+
+/* ── SELECTION BAR ── */
+.sel-bar{display:flex;align-items:center;gap:10px;padding:9px 14px;background:linear-gradient(90deg,#EBF3FF,#F0F6FF);border:1.5px solid #BBCFE8;border-radius:var(--r-md);flex-wrap:wrap;box-shadow:var(--shadow-sm)}
+.login-screen-flex{display:flex}
+
+/* ── DATE RANGE PICKER ── */
+.drp-wrap{position:relative;display:inline-block}
+.drp-btn{display:inline-flex;align-items:center;gap:7px;padding:7px 13px;background:var(--surface);border:1.5px solid var(--border);border-radius:var(--r);cursor:pointer;font-size:12.5px;font-weight:600;color:var(--text);white-space:nowrap;transition:border-color .15s}
+.drp-btn:hover{border-color:var(--gold)}
+.drp-btn.has-range{border-color:var(--gold);background:var(--gold-bg);color:var(--navy)}
+.drp-btn svg{opacity:.55}
+.drp-pop{position:absolute;top:calc(100% + 6px);left:0;z-index:200;background:var(--surface);border:1px solid var(--border);border-radius:var(--r-lg);box-shadow:var(--shadow-md);padding:16px;width:310px;display:none}
+.drp-pop.open{display:block}
+.drp-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+.drp-nav{background:none;border:1px solid var(--border);border-radius:6px;width:32px;height:32px;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--text-soft);font-size:16px;line-height:1}
+.drp-nav:hover{background:var(--bg)}
+.drp-month{font-size:13.5px;font-weight:700;color:var(--navy)}
+.drp-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:2px}
+.drp-day-hdr{text-align:center;font-size:10px;font-weight:700;color:var(--text-muted);padding:4px 0;text-transform:uppercase}
+.drp-day{text-align:center;padding:7px 2px;font-size:13px;border-radius:6px;cursor:pointer;color:var(--text);transition:background .1s;user-select:none;-webkit-user-select:none}
+.drp-day:hover:not(.drp-empty){background:var(--bg)}
+.drp-day.drp-today{font-weight:700;color:var(--navy)}
+.drp-day.drp-start,.drp-day.drp-end{background:var(--navy)!important;color:#fff!important;border-radius:6px}
+.drp-day.drp-in-range{background:var(--gold-bg);color:var(--navy)}
+.drp-day.drp-empty{cursor:default}
+.drp-footer{display:flex;justify-content:space-between;align-items:center;margin-top:12px;padding-top:10px;border-top:1px solid var(--border)}
+.drp-range-lbl{font-size:11px;color:var(--text-soft);font-weight:600}
+.drp-range-val{font-size:12px;font-weight:700;color:var(--navy)}
+/* Mobile: fixed fullscreen overlay */
+@media(max-width:640px){
+  .drp-pop{position:fixed;top:auto;bottom:0;left:0;right:0;width:100%;border-radius:var(--r-xl) var(--r-xl) 0 0;padding:20px 16px 28px;z-index:1000;box-shadow:0 -8px 32px rgba(13,27,46,.18);max-height:85vh;overflow-y:auto}
+  .drp-pop::before{content:'';display:block;width:36px;height:4px;background:var(--border-strong);border-radius:2px;margin:0 auto 16px}
+  .drp-day{padding:9px 2px;font-size:14px}
+  .drp-pop-overlay{position:fixed;inset:0;background:rgba(0,0,0,.35);z-index:999;display:none}
+  .drp-pop-overlay.open{display:block}
+}
+</style>
+
+</head>
+<body>
+<div class="drp-pop-overlay" id="drpOverlay" onclick="closeAllDrp()"></div>
+
+<!-- LOGIN -->
+<div id="loginScreen" style="min-height:100vh;align-items:stretch;background:var(--bg)" class="login-screen-flex">
+  <!-- Left panel — hidden on mobile -->
+  <div style="flex:0 0 420px;background:var(--navy);padding:3rem 2.8rem;flex-direction:column;justify-content:space-between;display:flex;position:relative;overflow:hidden" class="login-left-panel">
+    <div style="position:absolute;top:-100px;right:-100px;width:320px;height:320px;border-radius:50%;border:1px solid rgba(200,151,42,.1);background:rgba(200,151,42,.04)"></div>
+    <div style="position:absolute;bottom:-80px;left:-80px;width:240px;height:240px;border-radius:50%;border:1px solid rgba(200,151,42,.07);background:rgba(200,151,42,.03)"></div>
+    <div style="position:relative">
+      <div style="font-size:10px;font-weight:700;color:var(--gold);letter-spacing:3px;text-transform:uppercase;margin-bottom:48px;opacity:.85">TNADBA · Official Portal</div>
+      <div style="font-family:'Oswald',sans-serif;font-size:38px;font-weight:700;color:#fff;line-height:1.15;margin-bottom:16px;letter-spacing:.5px">Tamil Nadu<br/>Amateur<br/><span style="color:var(--gold-light)">Dodgeball</span></div>
+      <p style="font-size:13.5px;color:rgba(255,255,255,.4);line-height:1.75">Official player registration portal for all TNADBA events and national selections.</p>
+    </div>
+    <div style="position:relative">
+      <div style="height:1px;background:rgba(255,255,255,.08);margin-bottom:18px"></div>
+      <div style="font-size:11px;color:rgba(255,255,255,.3);line-height:2">
+        <div>📞 Ilayaraja — 7358448659</div>
+        <div>📞 Masiullah N — 8220567551</div>
+        <div style="margin-top:4px">tamilnaduamateurdodgeball.com</div>
+      </div>
+    </div>
+  </div>
+  <!-- Right form -->
+  <div style="flex:1;display:flex;align-items:center;justify-content:center;padding:2rem;background:var(--bg)">
+    <div style="width:100%;max-width:380px">
+      <!-- Mobile brand header (hidden on desktop) -->
+      <div class="login-mobile-header" style="text-align:center;margin-bottom:1.6rem;padding:1.5rem;background:var(--navy);border-radius:var(--r-xl);display:none">
+        <div style="font-size:9px;font-weight:700;color:var(--gold);letter-spacing:3px;text-transform:uppercase;margin-bottom:12px;opacity:.8">TNADBA · Official Portal</div>
+        <div style="font-family:'Oswald',sans-serif;font-size:26px;font-weight:700;color:#fff;line-height:1.2;letter-spacing:.5px">Tamil Nadu Amateur <span style="color:var(--gold-light)">Dodgeball</span></div>
+        <p style="font-size:12px;color:rgba(255,255,255,.4);margin-top:8px;line-height:1.6">Official registration portal for TNADBA events</p>
+      </div>
+      <div style="text-align:center;margin-bottom:2rem">
+        <div style="position:relative;display:inline-block;margin-bottom:1rem">
+          <div style="position:absolute;inset:-10px;border-radius:50%;background:radial-gradient(circle,rgba(200,151,42,.2),transparent 70%)"></div>
+          <img id="logoImg" style="width:82px;height:82px;border-radius:50%;object-fit:cover;border:3px solid var(--gold);box-shadow:0 4px 20px rgba(200,151,42,.25);position:relative" alt="TNADBA"/>
+        </div>
+        <h1 style="font-family:'Oswald',sans-serif;font-size:20px;font-weight:700;color:var(--navy);letter-spacing:1.5px;margin-bottom:6px">TNADBA DODGEBALL</h1>
+        <div style="display:flex;gap:4px;justify-content:center;margin-bottom:6px">
+          <div style="width:30px;height:2.5px;border-radius:2px;background:var(--gold)"></div>
+          <div style="width:14px;height:2.5px;border-radius:2px;background:var(--gold);opacity:.4"></div>
+          <div style="width:7px;height:2.5px;border-radius:2px;background:var(--gold);opacity:.2"></div>
+        </div>
+        <p style="font-size:10.5px;color:var(--text-muted);font-weight:600;text-transform:uppercase;letter-spacing:1.8px">Registration Portal</p>
+      </div>
+      <div style="background:var(--surface);border-radius:var(--r-xl);padding:1.8rem 2rem;box-shadow:var(--shadow-md);border:1px solid var(--border)">
+        <label style="margin-top:0">Username</label>
+        <input type="text" id="loginUser" placeholder="Enter your username" onkeydown="if(event.key==='Enter')doLogin()" autocomplete="username" inputmode="text"/>
+        <label>Password</label>
+        <div style="position:relative">
+          <input type="password" id="loginPass" placeholder="Enter your password" onkeydown="if(event.key==='Enter')doLogin()" autocomplete="current-password" style="padding-right:44px"/>
+          <button type="button" onclick="toggleLoginPw(this)" style="position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;padding:4px;color:var(--text-muted);display:flex;align-items:center;margin-top:2px" title="Show/hide password">
+            <svg id="pwEyeIcon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+          </button>
+        </div>
+        <div id="loginErr" class="err hidden"></div>
+        <button class="btn btn-primary" id="loginBtn" style="width:100%;margin-top:1.4rem;padding:14px;font-size:14px;border-radius:var(--r-md);letter-spacing:.8px;justify-content:center" onclick="doLogin()">Sign In →</button>
+      </div>
+      <div style="text-align:center;margin-top:1.2rem;font-size:11px;color:var(--text-muted);line-height:2">
+        📞 Ilayaraja &nbsp;·&nbsp; 7358448659 &nbsp;|&nbsp; Masiullah N &nbsp;·&nbsp; 8220567551
+      </div>
+    </div>
+  </div>
+</div>
+<style>
+@media(max-width:700px){
+  .login-left-panel{display:none!important}
+  .login-mobile-header{display:block!important}
+  #loginScreen > div:last-child{padding:1.2rem}
+}
+</style>
+
+<!-- WHO IS LOGGING IN (master only, for accountability in shared login) -->
+<div id="whoScreen" class="hidden" style="min-height:100vh;display:flex;align-items:center;justify-content:center;padding:1rem;background:radial-gradient(circle at 50% -10%,#FFFBF1,var(--bg) 55%)">
+  <div style="width:100%;max-width:400px">
+    <div style="text-align:center;margin-bottom:1.4rem">
+      <img class="topLogoImg" style="width:64px;height:64px;border-radius:50%;object-fit:cover;border:3px solid var(--gold)" alt="logo"/>
+      <h1 style="font-family:'Oswald',sans-serif;font-size:18px;font-weight:700;margin-top:12px;color:var(--navy)">Who's logging in?</h1>
+    </div>
+    <div class="card">
+      <label>Your Name</label>
+      <input type="text" id="whoName" placeholder="e.g. Ilayaraja" onkeydown="if(event.key==='Enter')confirmWho()"/>
+      <div id="whoErr" class="err hidden"></div>
+      <button class="btn btn-primary" style="width:100%;margin-top:1.2rem;padding:13px;font-size:15px" onclick="confirmWho()">Continue to Dashboard</button>
+    </div>
+  </div>
+</div>
+
+<!-- MASTER DASHBOARD -->
+<div id="masterScreen" class="hidden" style="min-height:100vh;background:var(--bg)">
+  <div class="topbar">
+    <div style="display:flex;align-items:center;gap:10px;min-width:0;flex:1">
+      <img class="topLogoImg" style="width:34px;height:34px;border-radius:50%;object-fit:cover;border:2px solid var(--gold);flex-shrink:0" alt="logo"/>
+      <div style="min-width:0">
+        <div style="font-family:'Oswald',sans-serif;font-weight:700;font-size:13px;color:#fff;letter-spacing:.6px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">TNADBA MASTER DASHBOARD</div>
+        <div style="font-size:9.5px;color:rgba(255,255,255,.35);letter-spacing:.2px;margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">Tamil Nadu Amateur Dodgeball Association</div>
+      </div>
+    </div>
+    <div style="display:flex;align-items:center;gap:6px;flex-shrink:0">
+      <div style="display:flex;align-items:center;gap:6px;padding:4px 10px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:20px">
+        <div style="width:6px;height:6px;border-radius:50%;background:#4ADE80;flex-shrink:0"></div>
+        <span id="topAdminName" style="font-size:11.5px;font-weight:600;color:var(--gold-light);letter-spacing:.2px;max-width:80px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap"></span>
+      </div>
+      <button class="btn btn-ghost btn-sm" onclick="doLogout()" style="border-radius:20px;padding:4px 10px;font-size:11px">Logout</button>
+    </div>
+  </div>
+  <div class="screen">
+    <div class="tabs">
+      <div class="tab active" id="tabBtnOverview" onclick="setTab('overview',this)">Overview</div>
+      <div class="tab" id="tabBtnPlayers" onclick="setTab('players',this)">All Players</div>
+      <div class="tab" id="tabBtnCoaches" onclick="setTab('coaches',this)">All Coaches</div>
+      <div class="tab hidden" id="tabBtnActivity" onclick="setTab('activity',this)">Activity Log</div>
+      <div class="tab" id="tabBtnSettings" onclick="setTab('settings',this)">Settings</div>
+    </div>
+
+    <div id="tabOverview">
+      <div class="section-label" style="margin-bottom:14px">Registration Summary</div>
+      <div class="grid4" style="margin-bottom:1rem">
+        <div class="stat">
+          <svg class="stat-icon" viewBox="0 0 38 38" fill="none" stroke="var(--navy)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="14" cy="13" r="4.5"/><circle cx="24" cy="13" r="4.5"/><path d="M5 31c0-5 4-8 9-8"/><path d="M33 31c0-5-4-8-9-8"/><path d="M12 23c1.8-.6 4.2-.6 6 0 3.5 1.2 6 4 6 8"/></svg>
+          <div class="stat-num" id="statTotal">-</div><div class="stat-lbl">Total Players</div>
+        </div>
+        <div class="stat">
+          <svg class="stat-icon" viewBox="0 0 38 38" fill="none" stroke="#1565C0" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="19" cy="13" r="5.5"/><path d="M8 32c0-6.08 4.92-11 11-11s11 4.92 11 11"/></svg>
+          <div class="stat-num" id="statBoys">-</div><div class="stat-lbl">Boys</div>
+        </div>
+        <div class="stat">
+          <svg class="stat-icon" viewBox="0 0 38 38" fill="none" stroke="#C62828" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="19" cy="12" r="5.5"/><path d="M9 31c0-5.52 4.48-10 10-10s10 4.48 10 10"/><path d="M15 27l4 4 4-4"/></svg>
+          <div class="stat-num" id="statGirls">-</div><div class="stat-lbl">Girls</div>
+        </div>
+        <div class="stat" style="border-top-color:#C8972A">
+          <svg class="stat-icon" viewBox="0 0 38 38" fill="none" stroke="#C8972A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="19,7 23,15 32,15 25,21 27.5,29 19,24 10.5,29 13,21 6,15 15,15"/></svg>
+          <div class="stat-num" id="statNational">-</div><div class="stat-lbl">National Players</div>
+        </div>
+      </div>
+      <div class="grid2" style="margin-bottom:1.4rem">
+        <div class="stat">
+          <svg class="stat-icon" viewBox="0 0 38 38" fill="none" stroke="var(--navy)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 14 Q10 8 19 8 Q28 8 28 14 L28 16 Q28 22 19 22 Q10 22 10 16 Z"/><path d="M7 14 h4 M27 14 h4"/><path d="M13 31 l6-9 6 9"/><line x1="19" y1="22" x2="19" y2="31"/></svg>
+          <div class="stat-num" id="statStudent">-</div><div class="stat-lbl">Students</div>
+        </div>
+        <div class="stat">
+          <svg class="stat-icon" viewBox="0 0 38 38" fill="none" stroke="var(--navy)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="7" y="16" width="24" height="16" rx="2.5"/><path d="M14 16v-3a5 5 0 0 1 10 0v3"/><line x1="7" y1="24" x2="31" y2="24"/><rect x="16" y="21" width="6" height="6" rx="1"/></svg>
+          <div class="stat-num" id="statWorking">-</div><div class="stat-lbl">Working</div>
+        </div>
+      </div>
+      <div class="toggle-row">
+        <div>
+          <div style="font-weight:700;font-size:14.5px;color:var(--navy)">Registration Status</div>
+          <div style="font-size:12.5px;color:var(--text-soft);margin-top:2px" id="regStatusText">Loading...</div>
+        </div>
+        <label class="toggle"><input type="checkbox" id="regToggle" onchange="toggleReg()"><span class="slider"></span></label>
+      </div>
+      <button class="btn btn-success" onclick="exportExcelAll()">&#11015; Export to Excel</button>
+    </div>
+
+    <div id="tabPlayers" class="hidden">
+      <div style="display:flex;gap:8px;margin-bottom:10px;flex-wrap:wrap;align-items:center;background:var(--surface);padding:10px 14px;border-radius:var(--r-md);border:1px solid var(--border);box-shadow:var(--shadow-sm)">
+        <input type="text" id="searchBox" placeholder="🔍  Search name, school, college, event, ID..." style="flex:1;min-width:180px;margin-top:0;background:var(--bg);font-size:13px" oninput="renderTable()"/>
+        <div style="display:flex;align-items:center;gap:6px">
+          <div class="drp-wrap" id="playerDrpWrap">
+            <div class="drp-btn" id="playerDrpBtn" onclick="toggleDrp('player')">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+              <span id="playerDrpLabel">Select Date Range</span>
+            </div>
+            <div class="drp-pop" id="playerDrpPop">
+              <div class="drp-head">
+                <button class="drp-nav" onclick="drpNav('player',-1)">&#8249;</button>
+                <span class="drp-month" id="playerDrpMonth"></span>
+                <button class="drp-nav" onclick="drpNav('player',1)">&#8250;</button>
+              </div>
+              <div class="drp-grid" id="playerDrpGrid"></div>
+              <div class="drp-footer">
+                <div>
+                  <div class="drp-range-lbl">Selected range</div>
+                  <div class="drp-range-val" id="playerDrpRange">—</div>
+                </div>
+                <button class="btn btn-sm btn-primary" onclick="closeAllDrp()">Done</button>
+              </div>
+            </div>
+          </div>
+          <button class="btn btn-sm" id="playerClearDrp" onclick="clearDrp('player')" style="display:none">✕ Clear</button>
+        </div>
+        <button class="btn btn-success btn-sm" onclick="exportExcel()">⬇ Export Filtered</button>
+      </div>
+      <!-- Selection bar -->
+      <div id="selectionBar" class="sel-bar" style="margin-bottom:10px">
+        <label style="display:flex;align-items:center;gap:7px;font-size:12.5px;font-weight:700;color:var(--navy);cursor:pointer;margin-top:0;text-transform:none;letter-spacing:0">
+          <input type="checkbox" id="selectAllChk" onchange="toggleSelectAll(this)" style="width:15px;height:15px;margin-top:0;accent-color:var(--navy)"/> Select All Visible
+        </label>
+        <div style="width:1px;height:16px;background:var(--border-strong)"></div>
+        <span id="selectedCount" style="font-size:12.5px;font-weight:700;color:var(--navy)">0 selected</span>
+        <div style="flex:1"></div>
+        <button class="btn btn-success btn-sm" onclick="exportSelectedExcel()">⬇ Export Selected</button>
+        <button class="btn btn-sm" onclick="clearSelection()">✕ Clear</button>
+      </div>
+      <div class="tabs" style="margin-bottom:12px">
+        <div class="tab active" id="genderTabAll" onclick="setGenderFilter('all',this)">All Players</div>
+        <div class="tab" id="genderTabBoys" onclick="setGenderFilter('male',this)">Boys</div>
+        <div class="tab" id="genderTabGirls" onclick="setGenderFilter('female',this)">Girls</div>
+      </div>
+      <div id="tableLoading" style="text-align:center;padding:2.5rem;color:var(--text-soft);font-size:13.5px">Loading players...</div>
+      <div class="overflow-x" id="tableWrap" style="display:none">
+        <table>
+          <thead><tr>
+            <th style="width:36px;text-align:center">✓</th>
+            <th>Player ID</th><th>Name</th><th>Gender</th><th>DOB</th><th>Phone</th>
+            <th>Father</th><th>Mother</th><th>Category</th><th>School/College</th>
+            <th>Aadhar</th><th>District</th><th>National</th><th>Event</th><th>Date</th><th>Actions</th>
+          </tr></thead>
+          <tbody id="playerTbody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <div id="tabCoaches" class="hidden">
+      <div style="display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap;align-items:center;background:var(--surface);padding:10px 14px;border-radius:var(--r-md);border:1px solid var(--border);box-shadow:var(--shadow-sm)">
+        <input type="text" id="coachSearchBox" placeholder="🔍  Search name, ID, working details..." style="flex:1;min-width:180px;margin-top:0;background:var(--bg);font-size:13px" oninput="renderCoachTable()"/>
+        <div style="display:flex;align-items:center;gap:6px">
+          <div class="drp-wrap" id="coachDrpWrap">
+            <div class="drp-btn" id="coachDrpBtn" onclick="toggleDrp('coach')">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+              <span id="coachDrpLabel">Select Date Range</span>
+            </div>
+            <div class="drp-pop" id="coachDrpPop">
+              <div class="drp-head">
+                <button class="drp-nav" onclick="drpNav('coach',-1)">&#8249;</button>
+                <span class="drp-month" id="coachDrpMonth"></span>
+                <button class="drp-nav" onclick="drpNav('coach',1)">&#8250;</button>
+              </div>
+              <div class="drp-grid" id="coachDrpGrid"></div>
+              <div class="drp-footer">
+                <div>
+                  <div class="drp-range-lbl">Selected range</div>
+                  <div class="drp-range-val" id="coachDrpRange">—</div>
+                </div>
+                <button class="btn btn-sm btn-primary" onclick="closeAllDrp()">Done</button>
+              </div>
+            </div>
+          </div>
+          <button class="btn btn-sm" id="coachClearDrp" onclick="clearDrp('coach')" style="display:none">✕ Clear</button>
+        </div>
+        <button class="btn btn-success btn-sm" onclick="exportCoachExcel()">⬇ Export Excel</button>
+      </div>
+      <div id="coachTableLoading" style="text-align:center;padding:2.5rem;color:var(--text-soft);font-size:13.5px">Loading coaches...</div>
+      <div class="overflow-x" id="coachTableWrap" style="display:none">
+        <table>
+          <thead><tr>
+            <th>Coach ID</th><th>Name</th><th>Gender</th><th>DOB</th><th>Phone</th>
+            <th>Aadhar</th><th>Working Details</th><th>District</th><th>Date</th><th>Actions</th>
+          </tr></thead>
+          <tbody id="coachTbody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <div id="tabActivity" class="hidden">
+      <div class="section-eyebrow">Recent Changes</div>
+      <p style="font-size:12.5px;color:var(--text-soft);margin-bottom:14px">Every registration, edit, and deletion is recorded here automatically.</p>
+      <div id="activityLoading" style="text-align:center;padding:2.5rem;color:var(--text-soft);font-size:13.5px">Loading activity...</div>
+      <div id="activityList" style="display:none"></div>
+    </div>
+
+    <div id="tabSettings" class="hidden">
+      <div class="card" style="margin-bottom:1rem">
+        <h3 style="font-family:'Oswald',sans-serif;font-size:14.5px;font-weight:700;margin-bottom:12px;color:var(--navy)">Registration Control</h3>
+        <div class="toggle-row" style="margin-bottom:0">
+          <div>
+            <div style="font-weight:700;color:var(--navy)">Open Registration</div>
+            <div style="font-size:12.5px;color:var(--text-soft);margin-top:2px">Turn OFF to stop new player submissions</div>
+          </div>
+          <label class="toggle"><input type="checkbox" id="regToggle2" onchange="syncToggle('regToggle2')"><span class="slider"></span></label>
+        </div>
+        <div id="settingsStatus" style="margin-top:10px;font-size:13px;padding:8px 12px;border-radius:6px"></div>
+        <div class="toggle-row" style="margin-top:12px;margin-bottom:0">
+          <div>
+            <div style="font-weight:700;color:var(--navy)">&#127939; Open Coach Registration</div>
+            <div style="font-size:12.5px;color:var(--text-soft);margin-top:2px">Turn OFF to stop new coach submissions (separate from player registration)</div>
+          </div>
+          <label class="toggle"><input type="checkbox" id="coachRegToggle" onchange="toggleCoachReg()"><span class="slider"></span></label>
+        </div>
+        <div id="coachSettingsStatus" style="margin-top:10px;font-size:13px;padding:8px 12px;border-radius:6px"></div>
+      </div>
+
+      <div class="card" style="margin-bottom:1rem">
+        <h3 style="font-family:'Oswald',sans-serif;font-size:14.5px;font-weight:700;margin-bottom:4px;color:var(--navy)">&#127942; Event Name</h3>
+        <p style="font-size:12.5px;color:var(--text-soft);margin-bottom:10px">This is shown to players on the registration form and saved with every new entry.</p>
+        <input type="text" id="eventNameInput" placeholder="e.g. Mumbai Senior National - 2026" oninput="updateEventPreview()"/>
+        <div style="display:flex;gap:8px;margin-top:10px;align-items:center">
+          <button class="btn btn-primary btn-sm" onclick="saveEventName()" id="saveEventBtn">Save Event Name</button>
+          <span id="eventSaveMsg" style="font-size:12px"></span>
+        </div>
+        <div style="margin-top:14px">
+          <div class="section-eyebrow" style="margin-bottom:8px">Live Preview on Player Form</div>
+          <div id="eventPreviewBanner" style="background:#F3E8CC;color:var(--gold);border:1px solid #D9BE7A;border-radius:var(--r);padding:10px 14px;font-weight:700;font-size:14px;text-align:center">&#127942; No event set</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3 style="font-family:'Oswald',sans-serif;font-size:14.5px;font-weight:700;margin-bottom:10px;color:var(--navy)">Contact Info</h3>
+        <p style="font-size:13px;margin-top:6px;color:var(--ink)"><b>Contact:</b> Ilayaraja</p>
+        <p style="font-size:13px;margin-top:4px;color:var(--ink)"><b>Phone:</b> 7358448659</p>
+        <p style="font-size:13px;margin-top:10px;color:var(--ink)"><b>Contact:</b> Masiullah N</p>
+        <p style="font-size:13px;margin-top:4px;color:var(--ink)"><b>Phone:</b> 8220567551</p>
+        <p style="font-size:13px;margin-top:10px;color:var(--ink)"><b>Email:</b> tamilnaduamateurdodgeballassoc@gmail.com</p>
+        <p style="font-size:13px;margin-top:4px;color:var(--ink)"><b>Website:</b> tamilnaduamateurdodgeball.com</p>
+        <hr style="margin:14px 0;border:none;border-top:1px solid var(--border)"/>
+        <h3 style="font-family:'Oswald',sans-serif;font-size:14px;font-weight:700;margin-bottom:8px;color:var(--navy)">Player Login</h3>
+        <p style="font-size:13px;margin-top:4px;color:var(--text-soft)">Player sign-in credentials are managed in Supabase Authentication, not shown here. Contact the administrator if the shared player login needs to be reset.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- EDIT MODAL -->
+<div id="editModal" class="modal-bg hidden">
+  <div class="modal">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
+      <h3 id="editModalTitle" style="font-family:'Oswald',sans-serif;font-size:16px;font-weight:700;color:var(--navy)">Edit Player</h3>
+      <button class="btn btn-sm" onclick="closeEdit()">&times; Close</button>
+    </div>
+    <div id="editFields"></div>
+    <div style="display:flex;gap:8px;margin-top:16px">
+      <button class="btn btn-primary" id="editSaveBtn" onclick="saveEditDispatch()">Save Changes</button>
+      <button class="btn" onclick="closeEdit()">Cancel</button>
+    </div>
+    <div id="editMsg"></div>
+  </div>
+</div>
+
+<!-- PLAYER REGISTRATION -->
+<div id="playerScreen" class="hidden" style="min-height:100vh;background:var(--bg)">
+  <div class="topbar">
+    <div style="display:flex;align-items:center;gap:12px">
+      <img class="topLogoImg" style="width:42px;height:42px;border-radius:50%;object-fit:cover;border:2px solid var(--gold)" alt="logo"/>
+      <div>
+        <div style="font-family:'Oswald',sans-serif;font-weight:700;font-size:15px;color:#fff;letter-spacing:.4px">TNADBA PLAYER REGISTRATION</div>
+        <div style="font-size:11px;color:#A9B4C9">Tamil Nadu Amateur Dodgeball Association</div>
+      </div>
+    </div>
+    <button class="btn btn-sm" onclick="doLogout()" style="color:#fff;border-color:var(--gold);background:transparent">Exit</button>
+  </div>
+  <div class="screen" style="max-width:560px;margin:0 auto">
+
+    <div id="regClosed" class="hidden closed-banner">
+      <div style="font-size:40px">&#128274;</div>
+      <h3 style="font-family:'Oswald',sans-serif;font-size:17px;font-weight:700;margin-top:10px;color:var(--red-deep)">Registration is Closed</h3>
+      <p style="font-size:13px;color:var(--red-deep);margin-top:6px">Contact administrator for more info.</p>
+      <p style="margin-top:8px;font-size:12px;color:var(--text-soft);line-height:1.6">Ilayaraja: 7358448659<br/>Masiullah N: 8220567551</p>
+    </div>
+
+    <div id="coachRegButtonWrap" class="hidden" style="margin-bottom:16px;text-align:center">
+      <button class="btn btn-primary" style="width:100%;padding:12px;font-size:14.5px" onclick="openCoachForm()">&#127939; Coach Registration</button>
+    </div>
+
+    <div id="formDone" class="hidden card" style="text-align:center;padding:2.5rem">
+      <div style="font-size:52px">&#9989;</div>
+      <h3 style="font-family:'Oswald',sans-serif;font-size:18px;font-weight:700;margin-top:14px;color:var(--green-deep)">Registration Submitted!</h3>
+      <div id="doneName" style="font-size:15px;font-weight:700;color:var(--navy);margin-top:12px"></div>
+      <div id="donePlayerID" style="margin-top:8px"></div>
+      <p style="font-size:13px;color:var(--gold);margin-top:12px;font-weight:600">&#128221; This is your Player ID — please note it down and save it.</p>
+      <p style="font-size:13px;color:var(--text-soft);margin-top:6px">Your details have been saved. You cannot edit after submission.</p>
+      <div style="display:flex;gap:10px;justify-content:center;margin-top:18px;flex-wrap:wrap">
+        <button class="btn btn-primary" onclick="registerAnother()">+ Register Another Player</button>
+        <button class="btn" onclick="doLogout()">Done, Exit</button>
+      </div>
+    </div>
+
+    <div id="regForm" class="card">
+      <h3 style="font-family:'Oswald',sans-serif;font-size:19px;font-weight:700;margin-bottom:4px;color:var(--navy);letter-spacing:.3px">Player Registration</h3>
+      <p style="font-size:12.5px;color:var(--text-soft);margin-bottom:6px">Fill all required (<span style="color:var(--red)">*</span>) fields and submit once.</p>
+      <p style="font-size:12.5px;margin-bottom:14px"><a href="javascript:void(0)" onclick="toggleLookup()" style="color:var(--navy);font-weight:600;text-decoration:underline">Already registered? Check your Player ID &rarr;</a></p>
+
+      <div id="lookupPanel" class="hidden" style="background:var(--bg);border:1px solid var(--border);border-radius:var(--r-md);padding:14px;margin-bottom:16px">
+        <label style="margin-top:0">Enter your Aadhar number or phone number</label>
+        <input type="text" id="lookupQuery" placeholder="Aadhar (12 digits) or phone (10 digits)" maxlength="12"/>
+        <div style="display:flex;gap:8px;margin-top:10px">
+          <button class="btn btn-primary btn-sm" onclick="doLookup()">Find My Registration</button>
+          <button class="btn btn-sm" onclick="toggleLookup()">Cancel</button>
+        </div>
+        <div id="lookupResult" style="margin-top:10px"></div>
+      </div>
+
+      <div id="eventNameBanner" class="hidden" style="background:#F3E8CC;color:var(--gold);border:1px solid #D9BE7A;border-radius:var(--r);padding:10px 14px;margin-bottom:16px;font-weight:700;font-size:14px;text-align:center"></div>
+
+      <div class="stage-track">
+        <div class="stage-block done"></div><div class="stage-block done"></div><div class="stage-block done"></div><div class="stage-block done"></div>
+      </div>
+      <p style="font-size:10.5px;color:var(--text-soft);text-transform:uppercase;letter-spacing:.4px;margin-bottom:22px;margin-top:-16px">Identity &middot; Family &middot; Category &middot; Verification</p>
+
+      <div class="section-eyebrow">Player Identity</div>
+      <label>Full Name <span class="req">*</span></label>
+      <input type="text" id="f_name" placeholder="Your full name" required/>
+      <label>Gender <span class="req">*</span></label>
+      <select id="f_gender" required>
+        <option value="">-- Select Gender --</option>
+        <option value="male">Male</option>
+        <option value="female">Female</option>
+      </select>
+      <label>Date of Birth <span class="req">*</span></label>
+      <input type="date" id="f_dob" required/>
+      <label>Phone Number <span class="req">*</span></label>
+      <input type="tel" id="f_phone" placeholder="10-digit mobile number" maxlength="10" required/>
+
+      <div class="section-eyebrow" style="margin-top:24px">Family Details</div>
+      <label>Father's Name <span class="req">*</span></label>
+      <input type="text" id="f_father" placeholder="Father's full name" required/>
+      <label>Mother's Name <span class="req">*</span></label>
+      <input type="text" id="f_mother" placeholder="Mother's full name" required/>
+
+      <div class="section-eyebrow" style="margin-top:24px">Category &amp; Institution</div>
+      <label>Category <span class="req">*</span></label>
+      <select id="f_cat" onchange="toggleCatFields()" required>
+        <option value="">-- Select Category --</option>
+        <option value="school">School Student</option>
+        <option value="college">College Student</option>
+        <option value="working">Working</option>
+      </select>
+      <div id="f_school_wrap" class="hidden">
+        <label>School Name <span class="req">*</span></label>
+        <input type="text" id="f_school" placeholder="School name"/>
+      </div>
+      <div id="f_college_wrap" class="hidden">
+        <label>College Name <span class="req">*</span></label>
+        <input type="text" id="f_college" placeholder="College / university name"/>
+      </div>
+
+      <div class="section-eyebrow" style="margin-top:24px">Verification &amp; Experience</div>
+      <label>Aadhar Number <span class="req">*</span></label>
+      <input type="text" id="f_aadhar" placeholder="12-digit Aadhar number" maxlength="12" inputmode="numeric" pattern="\d{12}" required oninput="this.value=this.value.replace(/\D/g,'');this.setCustomValidity(this.value.length===12?'':'Enter exactly 12 digits')"/>
+      <label>District <span class="req">*</span></label>
+      <select id="f_district" required>
+        <option value="">-- Select District --</option>
+        <option value="Ariyalur">Ariyalur</option>
+        <option value="Chengalpattu">Chengalpattu</option>
+        <option value="Chennai">Chennai</option>
+        <option value="Coimbatore">Coimbatore</option>
+        <option value="Cuddalore">Cuddalore</option>
+        <option value="Dharmapuri">Dharmapuri</option>
+        <option value="Dindigul">Dindigul</option>
+        <option value="Erode">Erode</option>
+        <option value="Kallakurichi">Kallakurichi</option>
+        <option value="Kanchipuram">Kanchipuram</option>
+        <option value="Kanyakumari">Kanyakumari</option>
+        <option value="Karur">Karur</option>
+        <option value="Krishnagiri">Krishnagiri</option>
+        <option value="Madurai">Madurai</option>
+        <option value="Mayiladuthurai">Mayiladuthurai</option>
+        <option value="Nagapattinam">Nagapattinam</option>
+        <option value="Namakkal">Namakkal</option>
+        <option value="Nilgiris">Nilgiris</option>
+        <option value="Perambalur">Perambalur</option>
+        <option value="Pudukkottai">Pudukkottai</option>
+        <option value="Ramanathapuram">Ramanathapuram</option>
+        <option value="Ranipet">Ranipet</option>
+        <option value="Salem">Salem</option>
+        <option value="Sivaganga">Sivaganga</option>
+        <option value="Tenkasi">Tenkasi</option>
+        <option value="Thanjavur">Thanjavur</option>
+        <option value="Theni">Theni</option>
+        <option value="Thoothukudi">Thoothukudi</option>
+        <option value="Tiruchirappalli">Tiruchirappalli</option>
+        <option value="Tirunelveli">Tirunelveli</option>
+        <option value="Tirupattur">Tirupattur</option>
+        <option value="Tiruppur">Tiruppur</option>
+        <option value="Tiruvallur">Tiruvallur</option>
+        <option value="Tiruvannamalai">Tiruvannamalai</option>
+        <option value="Tiruvarur">Tiruvarur</option>
+        <option value="Vellore">Vellore</option>
+        <option value="Viluppuram">Viluppuram</option>
+        <option value="Virudhunagar">Virudhunagar</option>
+      </select>
+      <label>Played at National Level in Dodgeball? <span class="req">*</span></label>
+      <select id="f_national" required>
+        <option value="">-- Select --</option>
+        <option value="no">No</option>
+        <option value="yes">Yes</option>
+      </select>
+
+      <div id="formErr" class="err hidden" style="margin-top:10px"></div>
+      <button class="btn btn-primary" id="submitBtn" style="width:100%;margin-top:18px;padding:13px;font-size:15px" onclick="submitForm()">
+        Submit Registration
+      </button>
+    </div>
+
+    <!-- COACH REGISTRATION (separate full screen, opened via button above) -->
+    <div id="coachRegClosed" class="hidden closed-banner">
+      <div style="font-size:40px">&#128274;</div>
+      <h3 style="font-family:'Oswald',sans-serif;font-size:17px;font-weight:700;margin-top:10px;color:var(--red-deep)">Coach Registration is Closed</h3>
+      <p style="font-size:13px;color:var(--red-deep);margin-top:6px">Contact administrator for more info.</p>
+      <p style="margin-top:8px;font-size:12px;color:var(--text-soft);line-height:1.6">Ilayaraja: 7358448659<br/>Masiullah N: 8220567551</p>
+      <button class="btn" style="margin-top:18px" onclick="closeCoachForm()">&larr; Back</button>
+    </div>
+
+    <div id="coachFormDone" class="hidden card" style="text-align:center;padding:2.5rem">
+      <div style="font-size:52px">&#9989;</div>
+      <h3 style="font-family:'Oswald',sans-serif;font-size:18px;font-weight:700;margin-top:14px;color:var(--green-deep)">Coach Registration Submitted!</h3>
+      <div id="coachDoneName" style="font-size:15px;font-weight:700;color:var(--navy);margin-top:12px"></div>
+      <div id="coachDoneID" style="margin-top:8px"></div>
+      <p style="font-size:13px;color:var(--gold);margin-top:12px;font-weight:600">&#128221; This is your Coach ID — please note it down and save it.</p>
+      <p style="font-size:13px;color:var(--text-soft);margin-top:6px">Your details have been saved. You cannot edit after submission.</p>
+      <div style="display:flex;gap:10px;justify-content:center;margin-top:18px;flex-wrap:wrap">
+        <button class="btn btn-primary" onclick="registerAnotherCoach()">+ Register Another Coach</button>
+        <button class="btn" onclick="doLogout()">Done, Exit</button>
+      </div>
+    </div>
+
+    <div id="coachRegForm" class="hidden card">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:4px">
+        <h3 style="font-family:'Oswald',sans-serif;font-size:19px;font-weight:700;color:var(--navy);letter-spacing:.3px">Coach Registration</h3>
+        <button class="btn btn-sm" onclick="closeCoachForm()">&larr; Back</button>
+      </div>
+      <p style="font-size:12.5px;color:var(--text-soft);margin-bottom:14px">Fill all required (<span style="color:var(--red)">*</span>) fields and submit once.</p>
+
+      <div class="stage-track" style="margin-bottom:22px">
+        <div class="stage-block done"></div><div class="stage-block done"></div><div class="stage-block done"></div>
+      </div>
+
+      <label>Full Name <span class="req">*</span></label>
+      <input type="text" id="cf_name" placeholder="Coach's full name" required/>
+      <label>Gender <span class="req">*</span></label>
+      <select id="cf_gender" required>
+        <option value="">-- Select Gender --</option>
+        <option value="male">Male</option>
+        <option value="female">Female</option>
+      </select>
+      <label>Date of Birth <span class="req">*</span></label>
+      <input type="date" id="cf_dob" required/>
+      <label>Phone Number <span class="req">*</span></label>
+      <input type="tel" id="cf_phone" placeholder="10-digit mobile number" maxlength="10" required/>
+      <label>Aadhar Number <span class="req">*</span></label>
+      <input type="text" id="cf_aadhar" placeholder="12-digit Aadhar number" maxlength="12" inputmode="numeric" pattern="\d{12}" required oninput="this.value=this.value.replace(/\D/g,'');this.setCustomValidity(this.value.length===12?'':'Enter exactly 12 digits')"/>
+      <label>Working Details <span class="req">*</span></label>
+      <textarea id="cf_working" rows="3" placeholder="Current workplace / club / institution / role" required></textarea>
+      <label>District <span class="req">*</span></label>
+      <select id="cf_district" required>
+        <option value="">-- Select District --</option>
+        <option value="Ariyalur">Ariyalur</option>
+        <option value="Chengalpattu">Chengalpattu</option>
+        <option value="Chennai">Chennai</option>
+        <option value="Coimbatore">Coimbatore</option>
+        <option value="Cuddalore">Cuddalore</option>
+        <option value="Dharmapuri">Dharmapuri</option>
+        <option value="Dindigul">Dindigul</option>
+        <option value="Erode">Erode</option>
+        <option value="Kallakurichi">Kallakurichi</option>
+        <option value="Kanchipuram">Kanchipuram</option>
+        <option value="Kanyakumari">Kanyakumari</option>
+        <option value="Karur">Karur</option>
+        <option value="Krishnagiri">Krishnagiri</option>
+        <option value="Madurai">Madurai</option>
+        <option value="Mayiladuthurai">Mayiladuthurai</option>
+        <option value="Nagapattinam">Nagapattinam</option>
+        <option value="Namakkal">Namakkal</option>
+        <option value="Nilgiris">Nilgiris</option>
+        <option value="Perambalur">Perambalur</option>
+        <option value="Pudukkottai">Pudukkottai</option>
+        <option value="Ramanathapuram">Ramanathapuram</option>
+        <option value="Ranipet">Ranipet</option>
+        <option value="Salem">Salem</option>
+        <option value="Sivaganga">Sivaganga</option>
+        <option value="Tenkasi">Tenkasi</option>
+        <option value="Thanjavur">Thanjavur</option>
+        <option value="Theni">Theni</option>
+        <option value="Thoothukudi">Thoothukudi</option>
+        <option value="Tiruchirappalli">Tiruchirappalli</option>
+        <option value="Tirunelveli">Tirunelveli</option>
+        <option value="Tirupattur">Tirupattur</option>
+        <option value="Tiruppur">Tiruppur</option>
+        <option value="Tiruvallur">Tiruvallur</option>
+        <option value="Tiruvannamalai">Tiruvannamalai</option>
+        <option value="Tiruvarur">Tiruvarur</option>
+        <option value="Vellore">Vellore</option>
+        <option value="Viluppuram">Viluppuram</option>
+        <option value="Virudhunagar">Virudhunagar</option>
+      </select>
+
+      <div id="coachFormErr" class="err hidden" style="margin-top:10px"></div>
+      <button class="btn btn-primary" id="coachSubmitBtn" style="width:100%;margin-top:18px;padding:13px;font-size:15px" onclick="submitCoachForm()">
+        Submit Coach Registration
+      </button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ===== CONFIG =====
+// NOTE: The Supabase URL/key below are PUBLIC by design (Supabase's
+// "publishable" key, safe to ship to a browser - it has no power on its
+// own without Row Level Security policies on the server). The 3 shared
+// login passwords (master/coach/player) are NOT stored here: doLogin()
+// sends the typed username+password to the check-login Edge Function,
+// which checks it against a hashed value on the server and returns only
+// the role. See edge_function/SETUP_STEPS.md for setup.
+var SB_URL = 'https://lalcwrbwwnloonyflyqq.supabase.co';
+var SB_KEY = 'sb_publishable_bJU8wrGL47qc0eCSaXit2A_ssxA9IfY';
+var sbClient = supabase.createClient(SB_URL, SB_KEY);
+var EDIT_PASSPHRASE = 'jVaUjHOiFxHBh8k3UCeVBmMC';
+var DELETE_PASSPHRASE = 'G39hoQYfutQnuIaDR3m7p1Dn';
+const LOGO_B64 = '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';
+
+// Set logo images
+window.addEventListener('DOMContentLoaded', function() {
+  document.querySelectorAll('#logoImg, .topLogoImg').forEach(function(img) {
+    img.src = 'data:image/jpeg;base64,' + LOGO_B64;
+  });
+});
+
+let allPlayers = [];
+let allCoaches = [];
+// Date range picker state
+const drpState = {
+  player: { from: null, to: null, picking: null, viewYear: new Date().getFullYear(), viewMonth: new Date().getMonth() },
+  coach:  { from: null, to: null, picking: null, viewYear: new Date().getFullYear(), viewMonth: new Date().getMonth() }
+};
+// Cached instantly from localStorage so UI has no flash-of-wrong-state;
+// these get overwritten by the source of truth in Supabase (app_settings) on load.
+let regOpen = localStorage.getItem('tnadba_reg_open') !== 'false';
+let coachRegOpen = localStorage.getItem('tnadba_coach_reg_open') !== 'false';
+let currentEventName = localStorage.getItem('tnadba_event_name') || '';
+let editPlayerID = null;
+let editCoachID = null;
+let editingType = 'player'; // 'player' or 'coach' -- which form the Edit modal is currently showing
+function saveEditDispatch() {
+  if (editingType === 'coach') saveEditCoach();
+  else saveEdit();
+}
+// Shared master login accountability: the name typed at the "Who's logging
+// in?" screen, kept only for this browser tab's session (cleared on logout).
+let currentAdminName = sessionStorage.getItem('tnadba_admin_name') || '';
+// True when logged in as the restricted Tncoach@user viewer role:
+// can see + edit Players and Coaches, but never delete, and doesn't
+// see Overview, Activity Log, or Settings at all.
+let isViewerMode = false;
+
+// ===== SUPABASE =====
+async function sbFetch(path, opts) {
+  // Use the real signed-in session's access token when available, so
+  // requests are recognized by RLS as "authenticated" rather than just
+  // carrying the publishable key. Falls back to the key alone only for
+  // calls made before any login (which will simply be denied by RLS).
+  const { data } = await sbClient.auth.getSession();
+  const token = (data && data.session && data.session.access_token) || SB_KEY;
+  const headers = { 'apikey': SB_KEY, 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' };
+  if (opts && opts.headers) Object.assign(headers, opts.headers);
+  const r = await fetch(SB_URL + '/rest/v1/' + path, Object.assign({}, opts, { headers }));
+  if (!r.ok) { const t = await r.text(); throw new Error(t); }
+  const txt = await r.text();
+  return txt ? JSON.parse(txt) : null;
+}
+const sbGet = (t, q) => sbFetch(t + (q||''));
+const sbPost = (t, d) => sbFetch(t, { method:'POST', headers:{'Prefer':'return=representation'}, body:JSON.stringify(d) });
+// sbPatch/sbDelete now route through secure Postgres functions instead of
+// raw PATCH/DELETE REST calls. The functions reject any request that
+// doesn't include the matching passphrase, so direct API calls without
+// going through this app can no longer edit or delete player/coach rows.
+// (app_settings PATCH below is unrelated to players/coaches and stays
+// as a direct call, matching its own simpler open policy.)
+const sbPatch = (t, id, d) => {
+  if (t === 'players' || t === 'coaches') {
+    return sbFetch('rpc/secure_update_row', {
+      method: 'POST',
+      body: JSON.stringify({ table_name: t, row_id: id, updates: d, passphrase: EDIT_PASSPHRASE, actor_name: currentAdminName || null })
+    });
+  }
+  return sbFetch(t + '?id=eq.' + id, { method:'PATCH', headers:{'Prefer':'return=representation'}, body:JSON.stringify(d) });
+};
+const sbDelete = (t, id) => {
+  if (t === 'players' || t === 'coaches') {
+    return sbFetch('rpc/secure_delete_row', {
+      method: 'POST',
+      body: JSON.stringify({ table_name: t, row_id: id, passphrase: DELETE_PASSPHRASE })
+    });
+  }
+  return sbFetch(t + '?id=eq.' + id, { method: 'DELETE' });
+};
+
+async function getNextPlayerID() {
+  try {
+    // Fetch recent player_ids and find the highest numeric suffix used so far,
+    // regardless of whether it's the old TNADBA-2026-XXX or new TNADBA-XXX format.
+    const rows = await sbGet('players', '?select=player_id&order=id.desc&limit=50');
+    let maxNum = 0;
+    if (rows && rows.length) {
+      rows.forEach(r => {
+        const parts = (r.player_id || '').split('-');
+        const n = parseInt(parts[parts.length - 1], 10);
+        if (!isNaN(n) && n > maxNum) maxNum = n;
+      });
+    }
+    return 'TNADBA-' + String(maxNum + 1).padStart(3, '0');
+  } catch(e) { return 'TNADBA-001'; }
+}
+
+// ===== SHARED APP SETTINGS (registration open/closed + event name) =====
+// Stored in Supabase (table: app_settings, single row id=1) so the toggle
+// and event name are the same for every device/browser, not just the one
+// the master happened to set it on. localStorage is kept only as an
+// instant-load cache for snappy UI before the network call resolves.
+async function fetchAppSettings() {
+  try {
+    const rows = await sbGet('app_settings', '?id=eq.1&select=reg_open,event_name,coach_reg_open');
+    if (rows && rows.length) {
+      regOpen = !!rows[0].reg_open;
+      currentEventName = rows[0].event_name || '';
+      coachRegOpen = rows[0].coach_reg_open !== false;
+      localStorage.setItem('tnadba_reg_open', regOpen ? 'true' : 'false');
+      localStorage.setItem('tnadba_event_name', currentEventName);
+      localStorage.setItem('tnadba_coach_reg_open', coachRegOpen ? 'true' : 'false');
+    }
+  } catch(e) { console.error('Could not load app_settings, using cached values:', e); }
+}
+
+async function pushAppSettings() {
+  return sbFetch('app_settings?id=eq.1', {
+    method: 'PATCH',
+    headers: { 'Prefer': 'return=representation' },
+    body: JSON.stringify({ reg_open: regOpen, event_name: currentEventName, coach_reg_open: coachRegOpen })
+  });
+}
+
+// ===== UI =====
+function showEl(id) { document.getElementById(id).classList.remove('hidden'); }
+function hideEl(id) { document.getElementById(id).classList.add('hidden'); }
+function esc(v) { return (v||'').toString().replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+const TN_DISTRICTS = ['Ariyalur','Chengalpattu','Chennai','Coimbatore','Cuddalore','Dharmapuri','Dindigul','Erode','Kallakurichi','Kanchipuram','Kanyakumari','Karur','Krishnagiri','Madurai','Mayiladuthurai','Nagapattinam','Namakkal','Nilgiris','Perambalur','Pudukkottai','Ramanathapuram','Ranipet','Salem','Sivaganga','Tenkasi','Thanjavur','Theni','Thoothukudi','Tiruchirappalli','Tirunelveli','Tirupattur','Tiruppur','Tiruvallur','Tiruvannamalai','Tiruvarur','Vellore','Viluppuram','Virudhunagar'];
+function districtOptionsHtml(selected) {
+  return '<option value="">-- Select District --</option>' +
+    TN_DISTRICTS.map(d => '<option value="' + d + '"' + (d === selected ? ' selected' : '') + '>' + d + '</option>').join('');
+}
+function formatAadhar(a) { return a ? a.replace(/(\d{4})(?=\d)/g, '$1 ') : '-'; }
+
+function toggleLoginPw(btn) {
+  const inp = document.getElementById('loginPass');
+  const icon = document.getElementById('pwEyeIcon');
+  const isHidden = inp.type === 'password';
+  inp.type = isHidden ? 'text' : 'password';
+  icon.innerHTML = isHidden
+    ? '<path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94"/><path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19"/><line x1="1" y1="1" x2="23" y2="23"/>'
+    : '<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>';
+  inp.focus();
+}
+
+async function doLogin() {
+  const username = document.getElementById('loginUser').value.trim();
+  const p = document.getElementById('loginPass').value;
+  hideEl('loginErr');
+  const btn = document.getElementById('loginBtn');
+
+  if (!username || !p) {
+    const el = document.getElementById('loginErr');
+    el.textContent = 'Please enter your username and password';
+    el.classList.remove('hidden');
+    return;
+  }
+
+  btn.disabled = true; btn.textContent = 'Signing in...';
+
+  let role = null;
+  try {
+    // The actual password check happens on the server, inside the
+    // check-login Edge Function - the browser only ever finds out
+    // the result (role + display name), never anything about whether
+    // the username or the password specifically was wrong.
+    const resp = await fetch(SB_URL + '/functions/v1/check-login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'apikey': SB_KEY, 'Authorization': 'Bearer ' + SB_KEY },
+      body: JSON.stringify({ username, password: p })
+    });
+    const result = await resp.json();
+    if (!resp.ok || result.error) throw new Error(result.error || 'Login failed');
+
+    role = result.role;
+    if (result.display_name) {
+      currentAdminName = result.display_name;
+      sessionStorage.setItem('tnadba_admin_name', currentAdminName);
+    }
+
+    // Sign in to Supabase's own auth as well, anonymously, so that
+    // RLS-protected requests later in the app (player/coach edits etc.)
+    // are made with a real authenticated session rather than just the
+    // publishable key. The role itself still comes only from the
+    // check-login function above, never from this anonymous session.
+    if (!(await sbClient.auth.getSession()).data.session) {
+      await sbClient.auth.signInAnonymously();
+    }
+  } catch(e) {
+    const el = document.getElementById('loginErr');
+    el.textContent = 'Invalid username or password';
+    el.classList.remove('hidden');
+    btn.disabled = false; btn.textContent = 'Sign In';
+    return;
+  }
+  btn.disabled = false; btn.textContent = 'Sign In';
+
+  if (role === 'master') {
+    isViewerMode = false;
+    document.getElementById('loginScreen').classList.add('hidden');
+    document.getElementById('whoScreen').classList.remove('hidden');
+    document.getElementById('whoName').value = currentAdminName || '';
+    setTimeout(() => document.getElementById('whoName').focus(), 50);
+  } else if (role === 'coach') {
+    isViewerMode = true;
+    document.getElementById('loginScreen').classList.add('hidden');
+    document.getElementById('whoScreen').classList.remove('hidden');
+    document.getElementById('whoName').value = currentAdminName || '';
+    setTimeout(() => document.getElementById('whoName').focus(), 50);
+  } else {
+    isViewerMode = false;
+    document.getElementById('loginScreen').classList.add('hidden');
+    document.getElementById('playerScreen').classList.remove('hidden');
+    checkRegStatus();
+  }
+}
+
+function confirmWho() {
+  const name = document.getElementById('whoName').value.trim();
+  if (!name) {
+    const el = document.getElementById('whoErr');
+    el.textContent = 'Please enter your name to continue.';
+    el.classList.remove('hidden');
+    return;
+  }
+  currentAdminName = name;
+  sessionStorage.setItem('tnadba_admin_name', name);
+  document.getElementById('whoScreen').classList.add('hidden');
+  document.getElementById('masterScreen').classList.remove('hidden');
+  applyViewerModeUI();
+  loadMaster();
+}
+
+function applyViewerModeUI() {
+  // Hide tabs the coach/viewer role should never see
+  document.getElementById('tabBtnOverview').classList.toggle('hidden', isViewerMode);
+  // Activity Log: master can see it, coach/viewer cannot
+  document.getElementById('tabBtnActivity').classList.toggle('hidden', isViewerMode);
+  document.getElementById('tabBtnSettings').classList.toggle('hidden', isViewerMode);
+  document.getElementById('tabBtnCoaches').classList.remove('hidden');
+  if (isViewerMode) {
+    setTab('players', document.getElementById('tabBtnPlayers'));
+  }
+}
+
+
+async function doLogout() {
+  try { await sbClient.auth.signOut(); } catch(e) { /* already signed out or offline -- fine either way */ }
+  const ls = document.getElementById('loginScreen');
+  ls.classList.remove('hidden');
+  ls.style.display = 'flex';
+  ['masterScreen','playerScreen','editModal','whoScreen'].forEach(id => document.getElementById(id).classList.add('hidden'));
+  document.getElementById('loginUser').value = '';
+  document.getElementById('loginPass').value = '';
+  currentAdminName = '';
+  isViewerMode = false;
+  sessionStorage.removeItem('tnadba_admin_name');
+  // Reset tab visibility so a future master login isn't left with tabs
+  // hidden from a previous viewer-mode session on the same device.
+  ['tabBtnOverview','tabBtnActivity','tabBtnSettings'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.classList.remove('hidden');
+  });
+}
+
+function updateEventPreview() {
+  const val = document.getElementById('eventNameInput').value.trim();
+  const banner = document.getElementById('eventPreviewBanner');
+  banner.innerHTML = val ? ('&#127942; ' + esc(val)) : '&#127942; No event set';
+}
+
+async function saveEventName() {
+  const val = document.getElementById('eventNameInput').value.trim();
+  const btn = document.getElementById('saveEventBtn');
+  const msg = document.getElementById('eventSaveMsg');
+  btn.disabled = true; btn.textContent = 'Saving...';
+  msg.style.color = 'var(--text-soft)'; msg.textContent = '';
+  try {
+    currentEventName = val;
+    await pushAppSettings();
+    localStorage.setItem('tnadba_event_name', currentEventName);
+    msg.style.color = 'var(--green-deep)'; msg.textContent = '\u2713 Saved — players will see this now';
+    updateEventPreview();
+  } catch(e) {
+    msg.style.color = 'var(--red-deep)'; msg.textContent = 'Could not save: ' + e.message;
+  } finally {
+    btn.disabled = false; btn.textContent = 'Save Event Name';
+    setTimeout(() => { msg.textContent = ''; }, 4000);
+  }
+}
+
+function setTab(t, el) {
+  document.querySelectorAll('.tab').forEach(x => x.classList.remove('active'));
+  el.classList.add('active');
+  ['tabOverview','tabPlayers','tabCoaches','tabActivity','tabSettings'].forEach(hideEl);
+  if (t === 'overview') { showEl('tabOverview'); loadStats(); }
+  else if (t === 'players') { showEl('tabPlayers'); loadPlayersTable(); }
+  else if (t === 'coaches') { showEl('tabCoaches'); loadCoachesTable(); }
+  else if (t === 'activity') { showEl('tabActivity'); loadActivityLog(); }
+  else {
+    showEl('tabSettings'); syncAllToggles();
+    document.getElementById('eventNameInput').value = currentEventName;
+    updateEventPreview();
+  }
+}
+
+// ===== MASTER =====
+async function loadMaster() {
+  const nameEl = document.getElementById('topAdminName');
+  if (nameEl) nameEl.textContent = currentAdminName ? currentAdminName + ' | ' : '';
+  await fetchAppSettings();
+  await loadStats();
+  syncAllToggles();
+}
+
+async function loadStats() {
+  try {
+    allPlayers = await sbGet('players', '?order=id.asc') || [];
+    document.getElementById('statTotal').textContent = allPlayers.length;
+    document.getElementById('statBoys').textContent = allPlayers.filter(p => p.gender === 'male').length;
+    document.getElementById('statGirls').textContent = allPlayers.filter(p => p.gender === 'female').length;
+    document.getElementById('statNational').textContent = allPlayers.filter(p => p.national === 'yes').length;
+    document.getElementById('statStudent').textContent = allPlayers.filter(p => p.cat === 'school' || p.cat === 'college').length;
+    document.getElementById('statWorking').textContent = allPlayers.filter(p => p.cat === 'working').length;
+  } catch(e) {
+    document.getElementById('statTotal').textContent = 'ERR';
+    console.error(e);
+  }
+  syncAllToggles();
+}
+
+async function loadPlayersTable() {
+  document.getElementById('tableLoading').style.display = 'block';
+  document.getElementById('tableWrap').style.display = 'none';
+  try {
+    allPlayers = await sbGet('players', '?order=id.asc') || [];
+    document.getElementById('tableLoading').style.display = 'none';
+    document.getElementById('tableWrap').style.display = 'block';
+    renderTable();
+  } catch(e) {
+    document.getElementById('tableLoading').textContent = 'Error: ' + e.message;
+  }
+}
+
+async function loadActivityLog() {
+  const loadingEl = document.getElementById('activityLoading');
+  const listEl = document.getElementById('activityList');
+  loadingEl.style.display = 'block';
+  listEl.style.display = 'none';
+  try {
+    const logs = await sbGet('players_audit_log', '?order=created_at.desc&limit=100') || [];
+    loadingEl.style.display = 'none';
+    listEl.style.display = 'block';
+    if (!logs.length) {
+      listEl.innerHTML = '<p style="color:var(--text-soft);font-size:13px;text-align:center;padding:2rem">No activity recorded yet.</p>';
+      return;
+    }
+    listEl.innerHTML = logs.map(function(log) {
+      const when = log.created_at ? new Date(log.created_at).toLocaleString('en-IN') : '';
+      const who = log.performed_by ? esc(log.performed_by) : 'Unknown';
+      let actionLabel, actionColor, detail = '';
+      if (log.action === 'insert') {
+        actionLabel = 'New Registration'; actionColor = 'var(--green-deep)';
+      } else if (log.action === 'delete') {
+        actionLabel = 'Deleted'; actionColor = 'var(--red-deep)';
+      } else {
+        actionLabel = 'Edited'; actionColor = 'var(--gold)';
+        if (log.changed_fields) {
+          const fields = Object.keys(log.changed_fields).filter(k => k !== 'created_at' && k !== 'last_action_by');
+          if (fields.length) {
+            detail = fields.map(f => {
+              const c = log.changed_fields[f];
+              return '<div style="margin-top:3px"><b>' + esc(f) + ':</b> ' + esc(c.old || '-') + ' &rarr; ' + esc(c.new || '-') + '</div>';
+            }).join('');
+          }
+        }
+      }
+      return '<div class="card" style="margin-bottom:10px;padding:14px 16px">' +
+        '<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px">' +
+          '<div>' +
+            '<span style="font-weight:700;color:' + actionColor + ';font-size:13.5px">' + actionLabel + '</span> ' +
+            '<span style="font-weight:600;color:var(--navy)">' + esc(log.player_name || '') + '</span> ' +
+            '<span class="pid" style="margin-left:4px">' + esc(log.player_id || '') + '</span>' +
+            (log.action !== 'insert' ? '<div style="font-size:11.5px;color:var(--text-soft);margin-top:4px">by <b>' + who + '</b></div>' : '') +
+          '</div>' +
+          '<span style="font-size:11.5px;color:var(--text-soft);white-space:nowrap">' + when + '</span>' +
+        '</div>' +
+        (detail ? '<div style="margin-top:8px;font-size:12px;color:var(--text-soft)">' + detail + '</div>' : '') +
+      '</div>';
+    }).join('');
+  } catch(e) {
+    loadingEl.style.display = 'block';
+    loadingEl.textContent = 'Could not load activity log: ' + e.message;
+  }
+}
+
+let genderFilter = 'all';
+function setGenderFilter(g, el) {
+  genderFilter = g;
+  document.querySelectorAll('#tabPlayers .tabs .tab').forEach(x => x.classList.remove('active'));
+  el.classList.add('active');
+  renderTable();
+}
+
+function getFilteredPlayers() {
+  const q = (document.getElementById('searchBox').value || '').toLowerCase();
+  const s = drpState.player;
+  return allPlayers.filter(p => {
+    const matchesSearch = (p.name||'').toLowerCase().includes(q) ||
+      (p.school||'').toLowerCase().includes(q) ||
+      (p.college||'').toLowerCase().includes(q) ||
+      (p.player_id||'').toLowerCase().includes(q) ||
+      (p.event_name||'').toLowerCase().includes(q) ||
+      (p.district||'').toLowerCase().includes(q);
+    const matchesGender = genderFilter === 'all' || p.gender === genderFilter;
+    const pDate = p.created_at ? p.created_at.slice(0,10) : '';
+    const matchesDate = (!s.from && !s.to) ||
+      (s.from && !s.to && pDate >= s.from) ||
+      (!s.from && s.to && pDate <= s.to) ||
+      (s.from && s.to && pDate >= s.from && pDate <= s.to);
+    return matchesSearch && matchesGender && matchesDate;
+  });
+}
+
+function renderTable() {
+  const tbody = document.getElementById('playerTbody');
+  const filtered = getFilteredPlayers();
+  if (!filtered.length) {
+    tbody.innerHTML = '<tr><td colspan="16" style="text-align:center;color:var(--text-soft);padding:2rem">No players found</td></tr>';
+    updateSelectionBar();
+    return;
+  }
+  tbody.innerHTML = filtered.map(function(p) {
+    const catLabel = p.cat === 'school' ? 'School' : p.cat === 'college' ? 'College' : 'Working';
+    const catBadge = p.cat === 'working' ? 'badge-amber' : 'badge-blue';
+    const genderLabel = p.gender === 'male' ? 'Male' : p.gender === 'female' ? 'Female' : '-';
+    const dt = p.created_at ? new Date(p.created_at).toLocaleDateString('en-IN') : '-';
+    const isChecked = selectedPlayerIds.has(p.id);
+    return '<tr style="' + (isChecked ? 'background:#EAF1FB;' : '') + '">' +
+      '<td style="text-align:center"><input type="checkbox" class="row-chk" data-id="' + p.id + '" ' + (isChecked ? 'checked' : '') + ' onchange="toggleRowSelect(this,' + p.id + ')" style="width:15px;height:15px;accent-color:var(--navy);cursor:pointer"/></td>' +
+      '<td><span class="pid">' + esc(p.player_id) + '</span></td>' +
+      '<td style="font-weight:600;white-space:nowrap">' + esc(p.name) + '</td>' +
+      '<td>' + genderLabel + '</td>' +
+      '<td style="white-space:nowrap">' + esc(p.dob) + '</td>' +
+      '<td>' + esc(p.phone) + '</td>' +
+      '<td style="white-space:nowrap">' + esc(p.father) + '</td>' +
+      '<td style="white-space:nowrap">' + esc(p.mother) + '</td>' +
+      '<td><span class="badge ' + catBadge + '">' + catLabel + '</span></td>' +
+      '<td style="white-space:nowrap">' + esc(p.school || p.college || '-') + '</td>' +
+      '<td style="font-family:monospace">' + formatAadhar(p.aadhar) + '</td>' +
+      '<td style="white-space:nowrap">' + esc(p.district || '-') + '</td>' +
+      '<td><span class="badge ' + (p.national === 'yes' ? 'badge-green' : 'badge-blue') + '">' + (p.national === 'yes' ? 'Yes' : 'No') + '</span></td>' +
+      '<td style="white-space:nowrap;font-size:11px">' + esc(p.event_name || '-') + '</td>' +
+      '<td style="white-space:nowrap;font-size:11px">' + dt + '</td>' +
+      '<td style="white-space:nowrap">' +
+        '<button class="btn btn-sm" style="margin-right:4px" onclick="openEdit(' + p.id + ')">Edit</button>' +
+        (isViewerMode ? '' : '<button class="btn btn-sm btn-danger" onclick="deletePlayer(' + p.id + ')">Del</button>') +
+      '</td>' +
+    '</tr>';
+  }).join('');
+  updateSelectionBar();
+}
+
+async function loadCoachesTable() {
+  document.getElementById('coachTableLoading').style.display = 'block';
+  document.getElementById('coachTableWrap').style.display = 'none';
+  try {
+    allCoaches = await sbGet('coaches', '?order=id.asc') || [];
+    document.getElementById('coachTableLoading').style.display = 'none';
+    document.getElementById('coachTableWrap').style.display = 'block';
+    renderCoachTable();
+  } catch(e) {
+    document.getElementById('coachTableLoading').textContent = 'Error: ' + e.message;
+  }
+}
+
+function getFilteredCoaches() {
+  const q = (document.getElementById('coachSearchBox').value || '').toLowerCase();
+  const s = drpState.coach;
+  return allCoaches.filter(c => {
+    const matchesSearch = (c.name||'').toLowerCase().includes(q) ||
+      (c.coach_id||'').toLowerCase().includes(q) ||
+      (c.working_details||'').toLowerCase().includes(q) ||
+      (c.district||'').toLowerCase().includes(q);
+    const cDate = c.created_at ? c.created_at.slice(0,10) : '';
+    const matchesDate = (!s.from && !s.to) ||
+      (s.from && !s.to && cDate >= s.from) ||
+      (!s.from && s.to && cDate <= s.to) ||
+      (s.from && s.to && cDate >= s.from && cDate <= s.to);
+    return matchesSearch && matchesDate;
+  });
+}
+
+function renderCoachTable() {
+  const tbody = document.getElementById('coachTbody');
+  const filtered = getFilteredCoaches();
+  if (!filtered.length) {
+    tbody.innerHTML = '<tr><td colspan="10" style="text-align:center;color:var(--text-soft);padding:2rem">No coaches found</td></tr>';
+    return;
+  }
+  tbody.innerHTML = filtered.map(function(c) {
+    const genderLabel = c.gender === 'male' ? 'Male' : c.gender === 'female' ? 'Female' : '-';
+    const dt = c.created_at ? new Date(c.created_at).toLocaleDateString('en-IN') : '-';
+    return '<tr>' +
+      '<td><span class="pid">' + esc(c.coach_id) + '</span></td>' +
+      '<td style="font-weight:600;white-space:nowrap">' + esc(c.name) + '</td>' +
+      '<td>' + genderLabel + '</td>' +
+      '<td style="white-space:nowrap">' + esc(c.dob) + '</td>' +
+      '<td>' + esc(c.phone) + '</td>' +
+      '<td style="font-family:monospace">' + formatAadhar(c.aadhar) + '</td>' +
+      '<td style="max-width:160px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">' + esc(c.working_details) + '</td>' +
+      '<td style="white-space:nowrap">' + esc(c.district || '-') + '</td>' +
+      '<td style="white-space:nowrap;font-size:11px">' + dt + '</td>' +
+      '<td style="white-space:nowrap">' +
+        '<button class="btn btn-sm" style="margin-right:4px" onclick="openEditCoach(' + c.id + ')">Edit</button>' +
+        (isViewerMode ? '' : '<button class="btn btn-sm btn-danger" onclick="deleteCoach(' + c.id + ')">Del</button>') +
+      '</td>' +
+    '</tr>';
+  }).join('');
+}
+
+async function deleteCoach(id) {
+  if (isViewerMode) { alert('This login cannot delete records.'); return; }
+  const admin = ensureAdminName();
+  if (!admin) return;
+  if (!confirm('Delete this coach? This cannot be undone.')) return;
+  try {
+    await sbPatch('coaches', id, { last_action_by: admin });
+    await sbDelete('coaches', id);
+    allCoaches = allCoaches.filter(c => c.id !== id);
+    renderCoachTable();
+    alert('Coach deleted successfully.');
+  } catch(e) { alert('Error: ' + e.message); }
+}
+
+function openEditCoach(id) {
+  const c = allCoaches.find(x => x.id === id);
+  if (!c) return;
+  editCoachID = id;
+  document.getElementById('editFields').innerHTML =
+    '<label>Full Name</label><input type="text" id="ec_name" value="' + esc(c.name) + '"/>' +
+    '<label>Gender</label><select id="ec_gender">' +
+      '<option value="male"' + (c.gender==='male'?' selected':'') + '>Male</option>' +
+      '<option value="female"' + (c.gender==='female'?' selected':'') + '>Female</option>' +
+    '</select>' +
+    '<label>Date of Birth</label><input type="date" id="ec_dob" value="' + esc(c.dob) + '"/>' +
+    '<label>Phone</label><input type="tel" id="ec_phone" value="' + esc(c.phone) + '" maxlength="10"/>' +
+    '<label>Aadhar Number</label><input type="text" id="ec_aadhar" value="' + esc(c.aadhar) + '" maxlength="12"/>' +
+    '<label>Working Details</label><textarea id="ec_working" rows="2">' + esc(c.working_details) + '</textarea>' +
+    '<label>District</label><select id="ec_district">' + districtOptionsHtml(c.district) + '</select>';
+  document.getElementById('editMsg').innerHTML = '';
+  editingType = 'coach';
+  document.getElementById('editModalTitle').textContent = 'Edit Coach';
+  document.getElementById('editModal').classList.remove('hidden');
+}
+
+async function saveEditCoach() {
+  const admin = ensureAdminName();
+  if (!admin) return;
+  const aadharVal = document.getElementById('ec_aadhar').value.trim();
+  if (!/^\d{12}$/.test(aadharVal)) {
+    document.getElementById('editMsg').innerHTML = '<div class="err">Aadhar must be exactly 12 digits.</div>';
+    return;
+  }
+  const data = {
+    name: document.getElementById('ec_name').value.trim(),
+    gender: document.getElementById('ec_gender').value,
+    dob: document.getElementById('ec_dob').value,
+    phone: document.getElementById('ec_phone').value.trim(),
+    aadhar: aadharVal,
+    working_details: document.getElementById('ec_working').value.trim(),
+    district: document.getElementById('ec_district').value,
+    last_action_by: admin
+  };
+  try {
+    await sbPatch('coaches', editCoachID, data);
+    document.getElementById('editMsg').innerHTML = '<div class="suc">Saved successfully!</div>';
+    allCoaches = allCoaches.map(c => c.id === editCoachID ? Object.assign({}, c, data) : c);
+    renderCoachTable();
+    setTimeout(closeEdit, 900);
+  } catch(e) {
+    const isDup = /duplicate key|already exists|unique constraint|uniq_coaches_aadhar/i.test(e.message);
+    document.getElementById('editMsg').innerHTML = '<div class="err">' +
+      (isDup ? 'Another coach already has this Aadhar number.' : 'Error: ' + e.message) +
+      '</div>';
+  }
+}
+
+function exportCoachExcel() {
+  const toExport = getFilteredCoaches();
+  if (!toExport.length) { alert('No coaches match the current view to export.'); return; }
+  try {
+    const rows = toExport.map(function(c, i) {
+      return {
+        '#': i+1, 'Coach ID': c.coach_id, 'Name': c.name,
+        'Gender': c.gender === 'male' ? 'Male' : c.gender === 'female' ? 'Female' : '',
+        'Date of Birth': c.dob, 'Phone': c.phone ? "'" + c.phone : '',
+        'Aadhar': c.aadhar ? "'" + c.aadhar : '',
+        'Working Details': c.working_details || '', 'District': c.district || '',
+        'Registered On': c.created_at ? new Date(c.created_at).toLocaleDateString('en-IN') : ''
+      };
+    });
+    const ws = XLSX.utils.json_to_sheet(rows);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, 'Coaches');
+    const s = drpState.coach;
+    const dateSuffix = s.from ? '_' + s.from + (s.to ? '_to_' + s.to : '') : '_' + new Date().toISOString().slice(0,10);
+    XLSX.writeFile(wb, 'TNADBA_Coaches' + dateSuffix + '.xlsx');
+  } catch(e) {
+    alert('Export failed: ' + e.message);
+    console.error('Excel export error:', e);
+  }
+}
+
+async function deletePlayer(id) {
+  if (isViewerMode) { alert('This login cannot delete records.'); return; }
+  const admin = ensureAdminName();
+  if (!admin) return;
+  if (!confirm('Delete this player? This cannot be undone.')) return;
+  try {
+    // Tag the row with who performed the deletion right before removing it,
+    // so the audit trigger's snapshot of the deleted row captures the name.
+    await sbPatch('players', id, { last_action_by: admin });
+    await sbDelete('players', id);
+    allPlayers = allPlayers.filter(p => p.id !== id);
+    renderTable();
+    loadStats();
+    alert('Player deleted successfully.');
+  } catch(e) { alert('Error: ' + e.message); }
+}
+
+function ensureAdminName() {
+  if (currentAdminName) return currentAdminName;
+  const name = prompt('Please enter your name to continue (for activity tracking):');
+  if (!name || !name.trim()) { alert('Name is required to make changes.'); return null; }
+  currentAdminName = name.trim();
+  sessionStorage.setItem('tnadba_admin_name', currentAdminName);
+  return currentAdminName;
+}
+
+function openEdit(id) {
+  const p = allPlayers.find(x => x.id === id);
+  if (!p) return;
+  editingType = 'player';
+  editPlayerID = id;
+  document.getElementById('editFields').innerHTML =
+    '<label>Full Name</label><input type="text" id="e_name" value="' + esc(p.name) + '"/>' +
+    '<label>Gender</label><select id="e_gender">' +
+      '<option value="male"' + (p.gender==='male'?' selected':'') + '>Male</option>' +
+      '<option value="female"' + (p.gender==='female'?' selected':'') + '>Female</option>' +
+    '</select>' +
+    '<label>Date of Birth</label><input type="date" id="e_dob" value="' + esc(p.dob) + '"/>' +
+    '<label>Phone</label><input type="tel" id="e_phone" value="' + esc(p.phone) + '" maxlength="10"/>' +
+    '<label>Father\'s Name</label><input type="text" id="e_father" value="' + esc(p.father) + '"/>' +
+    '<label>Mother\'s Name</label><input type="text" id="e_mother" value="' + esc(p.mother) + '"/>' +
+    '<label>Category</label><select id="e_cat">' +
+      '<option value="school"' + (p.cat==='school'?' selected':'') + '>School Student</option>' +
+      '<option value="college"' + (p.cat==='college'?' selected':'') + '>College Student</option>' +
+      '<option value="working"' + (p.cat==='working'?' selected':'') + '>Working</option>' +
+    '</select>' +
+    '<label>School Name</label><input type="text" id="e_school" value="' + esc(p.school) + '"/>' +
+    '<label>College Name</label><input type="text" id="e_college" value="' + esc(p.college) + '"/>' +
+    '<label>Aadhar Number</label><input type="text" id="e_aadhar" value="' + esc(p.aadhar) + '" maxlength="12"/>' +
+    '<label>District</label><select id="e_district">' + districtOptionsHtml(p.district) + '</select>' +
+    '<label>National Player</label><select id="e_national">' +
+      '<option value="no"' + (p.national==='no'?' selected':'') + '>No</option>' +
+      '<option value="yes"' + (p.national==='yes'?' selected':'') + '>Yes</option>' +
+    '</select>';
+  document.getElementById('editMsg').innerHTML = '';
+  document.getElementById('editModalTitle').textContent = 'Edit Player';
+  document.getElementById('editModal').classList.remove('hidden');
+}
+
+async function saveEdit() {
+  const admin = ensureAdminName();
+  if (!admin) return;
+  const aadharVal = document.getElementById('e_aadhar').value.trim();
+  if (!/^\d{12}$/.test(aadharVal)) {
+    document.getElementById('editMsg').innerHTML = '<div class="err">Aadhar must be exactly 12 digits.</div>';
+    return;
+  }
+  const data = {
+    name: document.getElementById('e_name').value.trim(),
+    gender: document.getElementById('e_gender').value,
+    dob: document.getElementById('e_dob').value,
+    phone: document.getElementById('e_phone').value.trim(),
+    father: document.getElementById('e_father').value.trim(),
+    mother: document.getElementById('e_mother').value.trim(),
+    cat: document.getElementById('e_cat').value,
+    school: document.getElementById('e_school').value.trim(),
+    college: document.getElementById('e_college').value.trim(),
+    aadhar: aadharVal,
+    district: document.getElementById('e_district').value,
+    national: document.getElementById('e_national').value,
+    last_action_by: admin
+  };
+  try {
+    await sbPatch('players', editPlayerID, data);
+    document.getElementById('editMsg').innerHTML = '<div class="suc">Saved successfully!</div>';
+    allPlayers = allPlayers.map(p => p.id === editPlayerID ? Object.assign({}, p, data) : p);
+    renderTable();
+    setTimeout(closeEdit, 900);
+  } catch(e) {
+    const isDup = /duplicate key|already exists|unique constraint|uniq_player_aadhar/i.test(e.message);
+    document.getElementById('editMsg').innerHTML = '<div class="err">' +
+      (isDup ? 'Another player already has this Aadhar number.' : 'Error: ' + e.message) +
+      '</div>';
+  }
+}
+
+function closeEdit() { document.getElementById('editModal').classList.add('hidden'); }
+
+async function toggleReg() {
+  await applyRegToggle(document.getElementById('regToggle').checked);
+}
+async function syncToggle(src) {
+  await applyRegToggle(document.getElementById(src).checked);
+}
+async function applyRegToggle(newVal) {
+  const prev = regOpen;
+  regOpen = newVal;
+  localStorage.setItem('tnadba_reg_open', regOpen ? 'true' : 'false');
+  syncAllToggles();
+  try {
+    await pushAppSettings();
+  } catch(e) {
+    // Roll back on failure so the UI doesn't show a state that didn't actually save
+    regOpen = prev;
+    localStorage.setItem('tnadba_reg_open', regOpen ? 'true' : 'false');
+    syncAllToggles();
+    alert('Could not update registration status: ' + e.message);
+  }
+}
+function syncAllToggles() {
+  document.getElementById('regToggle').checked = regOpen;
+  document.getElementById('regToggle2').checked = regOpen;
+  const txt = document.getElementById('regStatusText');
+  const stBox = document.getElementById('settingsStatus');
+  if (regOpen) {
+    txt.textContent = 'Players can currently submit registrations';
+    txt.style.color = 'var(--green-deep)';
+    stBox.style.cssText = 'background:#E3EFE7;color:#0F4A29;margin-top:10px;font-size:13px;padding:8px 12px;border-radius:7px;border-left:3px solid #1B6B3D';
+    stBox.textContent = 'Registration is currently OPEN - players can submit forms.';
+  } else {
+    txt.textContent = 'Registration is CLOSED - no new submissions';
+    txt.style.color = 'var(--red-deep)';
+    stBox.style.cssText = 'background:#F8E9E6;color:#7C281E;margin-top:10px;font-size:13px;padding:8px 12px;border-radius:7px;border-left:3px solid #A6362A';
+    stBox.textContent = 'Registration is currently CLOSED - no new submissions allowed.';
+  }
+  document.getElementById('coachRegToggle').checked = coachRegOpen;
+  const coachBox = document.getElementById('coachSettingsStatus');
+  if (coachRegOpen) {
+    coachBox.style.cssText = 'background:#E3EFE7;color:#0F4A29;margin-top:10px;font-size:13px;padding:8px 12px;border-radius:7px;border-left:3px solid #1B6B3D';
+    coachBox.textContent = 'Coach registration is currently OPEN - coaches can submit forms.';
+  } else {
+    coachBox.style.cssText = 'background:#F8E9E6;color:#7C281E;margin-top:10px;font-size:13px;padding:8px 12px;border-radius:7px;border-left:3px solid #A6362A';
+    coachBox.textContent = 'Coach registration is currently CLOSED - no new coach submissions allowed.';
+  }
+}
+
+async function toggleCoachReg() {
+  const prev = coachRegOpen;
+  coachRegOpen = document.getElementById('coachRegToggle').checked;
+  localStorage.setItem('tnadba_coach_reg_open', coachRegOpen ? 'true' : 'false');
+  syncAllToggles();
+  try {
+    await pushAppSettings();
+  } catch(e) {
+    coachRegOpen = prev;
+    localStorage.setItem('tnadba_coach_reg_open', coachRegOpen ? 'true' : 'false');
+    syncAllToggles();
+    alert('Could not update coach registration status: ' + e.message);
+  }
+}
+
+// ===== CHECKBOX SELECTION =====
+const selectedPlayerIds = new Set();
+
+function toggleRowSelect(chk, id) {
+  if (chk.checked) selectedPlayerIds.add(id);
+  else selectedPlayerIds.delete(id);
+  updateSelectionBar();
+}
+
+function toggleSelectAll(chk) {
+  const filtered = getFilteredPlayers();
+  filtered.forEach(p => {
+    if (chk.checked) selectedPlayerIds.add(p.id);
+    else selectedPlayerIds.delete(p.id);
+  });
+  renderTable();
+  updateSelectionBar();
+}
+
+function clearSelection() {
+  selectedPlayerIds.clear();
+  const selAll = document.getElementById('selectAllChk');
+  if (selAll) selAll.checked = false;
+  renderTable();
+  updateSelectionBar();
+}
+
+function updateSelectionBar() {
+  const count = selectedPlayerIds.size;
+  const el = document.getElementById('selectedCount');
+  if (el) el.textContent = count + ' selected';
+  // sync select-all checkbox
+  const filtered = getFilteredPlayers();
+  const selAll = document.getElementById('selectAllChk');
+  if (selAll && filtered.length > 0) {
+    const allChecked = filtered.every(p => selectedPlayerIds.has(p.id));
+    const someChecked = filtered.some(p => selectedPlayerIds.has(p.id));
+    selAll.checked = allChecked;
+    selAll.indeterminate = someChecked && !allChecked;
+  }
+}
+
+function exportSelectedExcel() {
+  if (selectedPlayerIds.size === 0) {
+    alert('No players selected. Use the checkboxes to select players first.');
+    return;
+  }
+  const toExport = allPlayers.filter(p => selectedPlayerIds.has(p.id));
+  doExportExcel(toExport, 'Selected_' + selectedPlayerIds.size + 'Players', '');
+}
+
+function exportExcel() {
+  const genderLabel = genderFilter === 'male' ? 'Boys' : genderFilter === 'female' ? 'Girls' : 'AllPlayers';
+  const s = drpState.player;
+  const dateLabel = s.from && s.to ? s.from + '_to_' + s.to : s.from || s.to || '';
+  doExportExcel(getFilteredPlayers(), genderLabel, dateLabel);
+}
+
+function exportExcelAll() {
+  doExportExcel(allPlayers, 'AllPlayers', '');
+}
+
+function doExportExcel(toExport, label, dateVal) {
+  if (!toExport.length) { alert('No players match the current view to export.'); return; }
+  try {
+    const rows = toExport.map(function(p, i) {
+      return {
+        '#': i+1, 'Player ID': p.player_id, 'Name': p.name,
+        'Gender': p.gender === 'male' ? 'Male' : p.gender === 'female' ? 'Female' : '',
+        'Date of Birth': p.dob, 'Phone': p.phone ? "'" + p.phone : '',
+        "Father's Name": p.father, "Mother's Name": p.mother,
+        'Category': p.cat === 'school' ? 'School Student' : p.cat === 'college' ? 'College Student' : 'Working',
+        'School': p.school||'', 'College': p.college||'', 'Aadhar': p.aadhar ? "'" + p.aadhar : '',
+        'District': p.district || '', 'National Player': p.national === 'yes' ? 'Yes' : 'No',
+        'Event': p.event_name || '',
+        'Registered On': p.created_at ? new Date(p.created_at).toLocaleDateString('en-IN') : ''
+      };
+    });
+    const ws = XLSX.utils.json_to_sheet(rows);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, label);
+    const dateSuffix = dateVal ? '_' + dateVal : '_' + new Date().toISOString().slice(0,10);
+    XLSX.writeFile(wb, 'TNADBA_' + label + dateSuffix + '.xlsx');
+  } catch(e) {
+    alert('Export failed: ' + e.message);
+    console.error('Excel export error:', e);
+  }
+}
+
+// ===== PLAYER FORM =====
+function applyRegStatusUI() {
+  if (!regOpen) { hideEl('regForm'); showEl('regClosed'); }
+  else {
+    showEl('regForm'); hideEl('regClosed'); hideEl('formDone');
+    const banner = document.getElementById('eventNameBanner');
+    if (currentEventName) { banner.innerHTML = '&#127942; ' + esc(currentEventName); showEl('eventNameBanner'); }
+    else { hideEl('eventNameBanner'); }
+  }
+  // The Coach Registration button is always visible from the player screen;
+  // whether the form itself is open is decided when the player taps it.
+  showEl('coachRegButtonWrap');
+}
+
+async function checkRegStatus() {
+  // Show cached state instantly, then refresh from Supabase so the player
+  // always sees the master's latest toggle + event name, even on a fresh device.
+  regOpen = localStorage.getItem('tnadba_reg_open') !== 'false';
+  currentEventName = localStorage.getItem('tnadba_event_name') || '';
+  applyRegStatusUI();
+  await fetchAppSettings();
+  applyRegStatusUI();
+}
+
+function resetRegForm() {
+  ['f_name','f_phone','f_father','f_mother','f_aadhar'].forEach(id => { document.getElementById(id).value = ''; });
+  document.getElementById('f_gender').value = '';
+  document.getElementById('f_dob').value = '';
+  document.getElementById('f_cat').value = '';
+  document.getElementById('f_school').value = '';
+  document.getElementById('f_college').value = '';
+  document.getElementById('f_national').value = '';
+  document.getElementById('f_district').value = '';
+  hideEl('f_school_wrap'); hideEl('f_college_wrap');
+  hideEl('formErr');
+  const btn = document.getElementById('submitBtn');
+  btn.disabled = false; btn.textContent = 'Submit Registration';
+}
+
+async function registerAnother() {
+  resetRegForm();
+  hideEl('formDone');
+  // Re-check registration status fresh in case the master closed
+  // registration or changed the event while this device was on the
+  // success screen — keeps a multi-entry session honest and current.
+  await checkRegStatus();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+// ===== COACH REGISTRATION =====
+async function openCoachForm() {
+  hideEl('regForm'); hideEl('regClosed'); hideEl('formDone');
+  hideEl('coachRegButtonWrap');
+  await fetchAppSettings();
+  if (!coachRegOpen) {
+    showEl('coachRegClosed');
+  } else {
+    resetCoachForm();
+    showEl('coachRegForm');
+  }
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function closeCoachForm() {
+  hideEl('coachRegForm'); hideEl('coachRegClosed'); hideEl('coachFormDone');
+  applyRegStatusUI();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+async function registerAnotherCoach() {
+  resetCoachForm();
+  hideEl('coachFormDone');
+  await fetchAppSettings();
+  if (!coachRegOpen) { showEl('coachRegClosed'); }
+  else { showEl('coachRegForm'); }
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function resetCoachForm() {
+  ['cf_name','cf_phone','cf_aadhar'].forEach(id => { document.getElementById(id).value = ''; });
+  document.getElementById('cf_gender').value = '';
+  document.getElementById('cf_dob').value = '';
+  document.getElementById('cf_working').value = '';
+  document.getElementById('cf_district').value = '';
+  hideEl('coachFormErr');
+  const btn = document.getElementById('coachSubmitBtn');
+  btn.disabled = false; btn.textContent = 'Submit Coach Registration';
+}
+
+async function getNextCoachID() {
+  try {
+    const rows = await sbGet('coaches', '?select=coach_id&order=id.desc&limit=50');
+    let maxNum = 0;
+    if (rows && rows.length) {
+      rows.forEach(r => {
+        const parts = (r.coach_id || '').split('-');
+        const n = parseInt(parts[parts.length - 1], 10);
+        if (!isNaN(n) && n > maxNum) maxNum = n;
+      });
+    }
+    return 'TNADBA-C-' + String(maxNum + 1).padStart(3, '0');
+  } catch(e) { return 'TNADBA-C-001'; }
+}
+
+async function submitCoachForm() {
+  const name = document.getElementById('cf_name').value.trim();
+  const gender = document.getElementById('cf_gender').value;
+  const dob = document.getElementById('cf_dob').value;
+  const phone = document.getElementById('cf_phone').value.trim();
+  const aadhar = document.getElementById('cf_aadhar').value.trim();
+  const working = document.getElementById('cf_working').value.trim();
+  const district = document.getElementById('cf_district').value;
+  const errEl = document.getElementById('coachFormErr');
+  hideEl('coachFormErr');
+
+  if (!name) { errEl.textContent = 'Full name is required.'; showEl('coachFormErr'); return; }
+  if (!gender) { errEl.textContent = 'Please select gender.'; showEl('coachFormErr'); return; }
+  if (!dob) { errEl.textContent = 'Date of birth is required.'; showEl('coachFormErr'); return; }
+  if (!/^\d{10}$/.test(phone)) { errEl.textContent = 'Enter a valid 10-digit phone number.'; showEl('coachFormErr'); return; }
+  if (!/^\d{12}$/.test(aadhar)) { errEl.textContent = 'Enter a valid 12-digit Aadhar number.'; showEl('coachFormErr'); return; }
+  if (!working) { errEl.textContent = 'Working details are required.'; showEl('coachFormErr'); return; }
+  if (!district) { errEl.textContent = 'Please select district.'; showEl('coachFormErr'); return; }
+
+  const btn = document.getElementById('coachSubmitBtn');
+  btn.disabled = true; btn.textContent = 'Checking...';
+
+  try {
+    const existing = await sbGet('coaches', '?aadhar=eq.' + encodeURIComponent(aadhar) + '&select=name,coach_id&limit=1');
+    if (existing && existing.length) {
+      errEl.innerHTML = 'This Aadhar number is already registered as a coach (Coach ID: <b>' + esc(existing[0].coach_id) + '</b>, Name: <b>' + esc(existing[0].name) + '</b>). One Aadhar number can only be registered once.';
+      showEl('coachFormErr');
+      btn.disabled = false; btn.textContent = 'Submit Coach Registration';
+      return;
+    }
+  } catch(e) {
+    errEl.textContent = 'Could not verify duplicate entry: ' + e.message + '. Please try again.';
+    showEl('coachFormErr');
+    btn.disabled = false; btn.textContent = 'Submit Coach Registration';
+    return;
+  }
+
+  btn.textContent = 'Submitting...';
+
+  try {
+    let coach_id = await getNextCoachID();
+    try {
+      await sbPost('coaches', { coach_id, name, gender, dob, phone, aadhar, working_details: working, district });
+    } catch(innerErr) {
+      const idCollision = /uniq_coaches_coach_id/i.test(innerErr.message);
+      if (idCollision) {
+        coach_id = await getNextCoachID();
+        await sbPost('coaches', { coach_id, name, gender, dob, phone, aadhar, working_details: working, district });
+      } else {
+        throw innerErr;
+      }
+    }
+    resetCoachForm();
+    btn.disabled = false; btn.textContent = 'Submit Coach Registration';
+    hideEl('coachRegForm'); showEl('coachFormDone');
+    document.getElementById('coachDoneName').textContent = name;
+    document.getElementById('coachDoneID').innerHTML = '<span class="pid" style="font-size:15px;padding:6px 16px">' + coach_id + '</span>';
+  } catch(e) {
+    const isDup = /duplicate key|already exists|unique constraint|uniq_coaches_aadhar/i.test(e.message);
+    errEl.textContent = isDup
+      ? 'This Aadhar number is already registered as a coach. One Aadhar number can only be registered once.'
+      : 'Submission error: ' + e.message + '. Please try again.';
+    showEl('coachFormErr');
+    btn.disabled = false; btn.textContent = 'Submit Coach Registration';
+  }
+}
+
+function toggleLookup() {
+  const panel = document.getElementById('lookupPanel');
+  panel.classList.toggle('hidden');
+  if (!panel.classList.contains('hidden')) {
+    document.getElementById('lookupQuery').value = '';
+    document.getElementById('lookupResult').innerHTML = '';
+    document.getElementById('lookupQuery').focus();
+  }
+}
+
+async function doLookup() {
+  const val = document.getElementById('lookupQuery').value.trim();
+  const resultEl = document.getElementById('lookupResult');
+  if (!/^\d{10}$/.test(val) && !/^\d{12}$/.test(val)) {
+    resultEl.innerHTML = '<div class="err">Enter a valid 12-digit Aadhar number or 10-digit phone number.</div>';
+    return;
+  }
+  resultEl.innerHTML = '<div style="font-size:13px;color:var(--text-soft)">Searching...</div>';
+  try {
+    const field = val.length === 12 ? 'aadhar' : 'phone';
+    const rows = await sbGet('players', '?' + field + '=eq.' + encodeURIComponent(val) + '&select=name,player_id,event_name&limit=1');
+    if (rows && rows.length) {
+      resultEl.innerHTML =
+        '<div class="suc">Found! <b>' + esc(rows[0].name) + '</b> — <span class="pid">' + esc(rows[0].player_id) + '</span>' +
+        (rows[0].event_name ? '<br/><span style="font-size:12px">Event: ' + esc(rows[0].event_name) + '</span>' : '') +
+        '</div>';
+    } else {
+      resultEl.innerHTML = '<div class="err">No registration found with that number. Please check and try again, or register below.</div>';
+    }
+  } catch(e) {
+    resultEl.innerHTML = '<div class="err">Could not search right now: ' + e.message + '</div>';
+  }
+}
+
+// Guard against the browser restoring a frozen mid-submit / success screen
+// from cache (back-forward cache) when the page is reopened or revisited.
+window.addEventListener('pageshow', function() {
+  const submitBtn = document.getElementById('submitBtn');
+  if (submitBtn) { submitBtn.disabled = false; submitBtn.textContent = 'Submit Registration'; }
+  const coachSubmitBtn = document.getElementById('coachSubmitBtn');
+  if (coachSubmitBtn) { coachSubmitBtn.disabled = false; coachSubmitBtn.textContent = 'Submit Coach Registration'; }
+  const playerScreen = document.getElementById('playerScreen');
+  if (playerScreen && !playerScreen.classList.contains('hidden')) {
+    resetRegForm();
+    checkRegStatus();
+  }
+});
+
+function toggleCatFields() {
+  const v = document.getElementById('f_cat').value;
+  document.getElementById('f_school_wrap').classList.toggle('hidden', v !== 'school');
+  document.getElementById('f_college_wrap').classList.toggle('hidden', v !== 'college');
+}
+
+async function submitForm() {
+  if (!regOpen) { hideEl('regForm'); showEl('regClosed'); return; }
+  const name = document.getElementById('f_name').value.trim();
+  const gender = document.getElementById('f_gender').value;
+  const dob = document.getElementById('f_dob').value;
+  const phone = document.getElementById('f_phone').value.trim();
+  const father = document.getElementById('f_father').value.trim();
+  const mother = document.getElementById('f_mother').value.trim();
+  const cat = document.getElementById('f_cat').value;
+  const aadhar = document.getElementById('f_aadhar').value.trim();
+  const district = document.getElementById('f_district').value;
+  const national = document.getElementById('f_national').value;
+  const school = cat === 'school' ? document.getElementById('f_school').value.trim() : '';
+  const college = cat === 'college' ? document.getElementById('f_college').value.trim() : '';
+  const errEl = document.getElementById('formErr');
+  errEl.textContent = ''; hideEl('formErr');
+
+  if (!name) { errEl.textContent = 'Full name is required.'; showEl('formErr'); return; }
+  if (!gender) { errEl.textContent = 'Please select gender.'; showEl('formErr'); return; }
+  if (!dob) { errEl.textContent = 'Date of birth is required.'; showEl('formErr'); return; }
+  if (!/^\d{10}$/.test(phone)) { errEl.textContent = 'Enter a valid 10-digit phone number.'; showEl('formErr'); return; }
+  if (!father) { errEl.textContent = "Father's name is required."; showEl('formErr'); return; }
+  if (!mother) { errEl.textContent = "Mother's name is required."; showEl('formErr'); return; }
+  if (!cat) { errEl.textContent = 'Select a category.'; showEl('formErr'); return; }
+  if (cat === 'school' && !school) { errEl.textContent = 'School name is required.'; showEl('formErr'); return; }
+  if (cat === 'college' && !college) { errEl.textContent = 'College name is required.'; showEl('formErr'); return; }
+  if (!/^\d{12}$/.test(aadhar)) { errEl.textContent = 'Enter a valid 12-digit Aadhar number.'; showEl('formErr'); return; }
+  if (!district) { errEl.textContent = 'Please select your district.'; showEl('formErr'); return; }
+  if (!national) { errEl.textContent = 'Please specify if you played at national level.'; showEl('formErr'); return; }
+
+  const btn = document.getElementById('submitBtn');
+  btn.disabled = true; btn.textContent = 'Checking...';
+
+  // ===== DUPLICATE CHECK: same Aadhar number already registered =====
+  try {
+    const existing = await sbGet('players', '?aadhar=eq.' + encodeURIComponent(aadhar) + '&select=name,aadhar,player_id&limit=1');
+    if (existing && existing.length) {
+      errEl.innerHTML = 'This Aadhar number is already registered (Player ID: <b>' + esc(existing[0].player_id) + '</b>, Name: <b>' + esc(existing[0].name) + '</b>). One Aadhar number can only be registered once.';
+      showEl('formErr');
+      btn.disabled = false; btn.textContent = 'Submit Registration';
+      return;
+    }
+  } catch(e) {
+    errEl.textContent = 'Could not verify duplicate entry: ' + e.message + '. Please try again.';
+    showEl('formErr');
+    btn.disabled = false; btn.textContent = 'Submit Registration';
+    return;
+  }
+
+  btn.textContent = 'Submitting...';
+
+  try {
+    let player_id = await getNextPlayerID();
+    try {
+      await sbPost('players', { player_id, name, gender, dob, phone, father, mother, cat, school, college, aadhar, district, national, event_name: currentEventName || null });
+    } catch(innerErr) {
+      // Two people submitting at nearly the same instant can briefly compute
+      // the same "next" Player ID. If that collision is what failed (not an
+      // Aadhar duplicate), get a fresh ID and try exactly once more before
+      // giving up, rather than surfacing a confusing error to the player.
+      const idCollision = /uniq_players_player_id/i.test(innerErr.message);
+      if (idCollision) {
+        player_id = await getNextPlayerID();
+        await sbPost('players', { player_id, name, gender, dob, phone, father, mother, cat, school, college, aadhar, district, national, event_name: currentEventName || null });
+      } else {
+        throw innerErr;
+      }
+    }
+    resetRegForm();
+    btn.disabled = false; btn.textContent = 'Submit Registration';
+    hideEl('regForm'); showEl('formDone');
+    document.getElementById('doneName').textContent = name;
+    document.getElementById('donePlayerID').innerHTML = '<span class="pid" style="font-size:15px;padding:6px 16px">' + player_id + '</span>';
+  } catch(e) {
+    const isDup = /duplicate key|already exists|unique constraint|uniq_player_aadhar/i.test(e.message);
+    errEl.textContent = isDup
+      ? 'This Aadhar number is already registered. One Aadhar number can only be registered once.'
+      : 'Submission error: ' + e.message + '. Please try again.';
+    showEl('formErr');
+    btn.disabled = false; btn.textContent = 'Submit Registration';
+  }
+}
+
+// ===== DATE RANGE PICKER ENGINE =====
+const DRP_MONTHS=['January','February','March','April','May','June','July','August','September','October','November','December'];
+const DRP_DAYS=['Su','Mo','Tu','We','Th','Fr','Sa'];
+function drpFmt(d){if(!d)return '';const[y,m,day]=d.split('-');return day+' '+DRP_MONTHS[parseInt(m)-1].slice(0,3)+' '+y;}
+function drpRender(ns){
+  const s=drpState[ns],y=s.viewYear,m=s.viewMonth;
+  document.getElementById(ns+'DrpMonth').textContent=DRP_MONTHS[m]+' '+y;
+  const grid=document.getElementById(ns+'DrpGrid');
+  const firstDay=new Date(y,m,1).getDay();
+  const daysInMonth=new Date(y,m+1,0).getDate();
+  const today=new Date().toISOString().slice(0,10);
+  let html=DRP_DAYS.map(function(d){return '<div class="drp-day-hdr">'+d+'</div>';}).join('');
+  for(let i=0;i<firstDay;i++)html+='<div class="drp-day drp-empty"></div>';
+  for(let d=1;d<=daysInMonth;d++){
+    const iso=y+'-'+String(m+1).padStart(2,'0')+'-'+String(d).padStart(2,'0');
+    let cls='drp-day';
+    if(iso===today)cls+=' drp-today';
+    if(iso===s.from)cls+=' drp-start';
+    if(iso===s.to)cls+=' drp-end';
+    if(s.from&&s.to&&iso>s.from&&iso<s.to)cls+=' drp-in-range';
+    html+='<div class="'+cls+'" onclick="drpPick(\''+ns+'\',\''+iso+'\')">'+d+'</div>';
+  }
+  grid.innerHTML=html;
+  const rangeLbl=document.getElementById(ns+'DrpRange');
+  if(s.from&&s.to)rangeLbl.textContent=drpFmt(s.from)+' → '+drpFmt(s.to);
+  else if(s.from)rangeLbl.textContent=drpFmt(s.from)+' → pick end date';
+  else rangeLbl.textContent='—';
+  const btn=document.getElementById(ns+'DrpBtn'),lbl=document.getElementById(ns+'DrpLabel');
+  const clearBtn=document.getElementById(ns+'ClearDrp');
+  if(s.from&&s.to){btn.classList.add('has-range');lbl.textContent=drpFmt(s.from)+' – '+drpFmt(s.to);if(clearBtn)clearBtn.style.display='';}
+  else if(s.from){btn.classList.add('has-range');lbl.textContent=drpFmt(s.from)+' – ?';if(clearBtn)clearBtn.style.display='';}
+  else{btn.classList.remove('has-range');lbl.textContent='Select Date Range';if(clearBtn)clearBtn.style.display='none';}
+}
+function drpPick(ns,iso){
+  const s=drpState[ns];
+  if(!s.from||(s.from&&s.to)){s.from=iso;s.to=null;s.picking='to';}
+  else if(s.picking==='to'){if(iso<s.from){s.to=s.from;s.from=iso;}else s.to=iso;s.picking=null;}
+  drpRender(ns);
+  if(ns==='player')renderTable();else renderCoachTable();
+}
+function drpNav(ns,dir){
+  const s=drpState[ns];s.viewMonth+=dir;
+  if(s.viewMonth>11){s.viewMonth=0;s.viewYear++;}
+  if(s.viewMonth<0){s.viewMonth=11;s.viewYear--;}
+  drpRender(ns);
+}
+function closeAllDrp(){
+  document.querySelectorAll('.drp-pop').forEach(function(p){p.classList.remove('open');});
+  var ov=document.getElementById('drpOverlay');if(ov)ov.classList.remove('open');
+}
+function toggleDrp(ns){
+  const pop=document.getElementById(ns+'DrpPop');
+  const isOpen=pop.classList.contains('open');
+  closeAllDrp();
+  if(!isOpen){
+    pop.classList.add('open');
+    var ov=document.getElementById('drpOverlay');if(ov)ov.classList.add('open');
+    drpRender(ns);
+  }
+}
+function clearDrp(ns){
+  const s=drpState[ns];s.from=null;s.to=null;s.picking=null;
+  drpRender(ns);
+  closeAllDrp();
+  if(ns==='player')renderTable();else renderCoachTable();
+}
+document.addEventListener('click',function(e){
+  var anyWrap=e.target.closest('.drp-wrap');
+  if(!anyWrap) closeAllDrp();
+});
+</script>
+</body>
+</html>
